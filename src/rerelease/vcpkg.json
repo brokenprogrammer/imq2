@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "q2-game-dll",
+  "version": "2022",
+  "dependencies": [
+    "fmt",
+    "jsoncpp"
+  ],
+  "builtin-baseline": "e590c2b30c08caf1dd8d612ec602a003f9784b7d"
+}
