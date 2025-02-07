@@ -990,6 +990,18 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             continue;
         }
 
+        if (!strcmp(token, "picc"))
+        {
+            // draw a pic from color
+            token = COM_Parse(&s);
+            int ColorValue = atoi(token);
+            if (!skip_depth)
+            {
+                rgba_t c = { ColorValue, ColorValue, ColorValue, 255 };
+                cgi.SCR_DrawColorPic(x, y, w* scale, h* scale, "_white", c);
+            }
+        }
+
         if (!strcmp(token, "num"))
         {   // draw a number
             token = COM_Parse (&s);

@@ -1620,6 +1620,10 @@ void Cmd_CustomUI_f(edict_t* ent)
 	std::string helpString = "";
 	helpString += G_Fmt(
 		"xv 0 yv 8 picn oskarcon1 "		   // background
+		"xv 0 yv 16 picc 0 "
+		"xv 0 yv 50 picc 100 "
+		"xv 0 yv 100 picc 200 "
+		"xv 0 yv 200 picc 255 "
 		"xv 0 yv 25 cstring2 \"{}\" ",  // level name
 		"King Oskar");
 
