@@ -851,6 +851,18 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
                 y = (hud_vrect.y + hud_vrect.height/2 + (atoi(token) - hy)) * scale;
             continue;
         }
+        if (!strcmp(token, "w"))
+        {
+            token = COM_Parse(&s);
+            w = atoi(token);
+            continue;
+        }
+        if (!strcmp(token, "h"))
+        {
+            token = COM_Parse(&s);
+            h = atoi(token);
+            continue;
+        }
 
         if (!strcmp(token, "pic"))
         {   // draw a pic from a stat number

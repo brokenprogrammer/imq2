@@ -78,6 +78,7 @@
       <Filter>xatrix</Filter>
     </ClInclude>
     <ClInclude Include="p_menu.h" />
+    <ClInclude Include="imq2.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cg_main.cpp" />
@@ -249,6 +250,7 @@
       <Filter>xatrix</Filter>
     </ClCompile>
     <ClCompile Include="p_menu.cpp" />
+    <ClCompile Include="imq2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="bots">

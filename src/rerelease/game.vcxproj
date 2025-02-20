@@ -111,6 +111,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_statusbar.h" />
+    <ClInclude Include="imq2.h" />
     <ClInclude Include="m_actor.h" />
     <ClInclude Include="m_arachnid.h" />
     <ClInclude Include="m_berserk.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="g_turret.cpp" />
     <ClCompile Include="g_utils.cpp" />
     <ClCompile Include="g_weapon.cpp" />
+    <ClCompile Include="imq2.cpp" />
     <ClCompile Include="m_actor.cpp" />
     <ClCompile Include="m_arachnid.cpp" />
     <ClCompile Include="m_berserk.cpp" />

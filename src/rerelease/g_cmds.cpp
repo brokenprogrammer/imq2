@@ -1595,6 +1595,7 @@ static void Cmd_ListMonsters_f(edict_t *ent)
 Cmd_CustomUI_f
 =================
 */
+#include "imq2.h"
 void Cmd_CustomUI_f(edict_t* ent)
 {
 	int		   i;
@@ -1617,15 +1618,45 @@ void Cmd_CustomUI_f(edict_t* ent)
 
 	cl->showCustomUI = true;
 
+	imq2_rect Layout = { 0, 0, 180, 16 };
+
+	imq2_rect R1 = CutLeft(&Layout, 16);
+	imq2_rect R2 = CutLeft(&Layout, 16);
+	imq2_rect R3 = CutLeft(&Layout, 16);
+
+	imq2_rect R4 = CutRight(&Layout, 16);
+	imq2_rect R5 = CutRight(&Layout, 16);
+
 	std::string helpString = "";
-	helpString += G_Fmt(
-		"xv 0 yv 8 picn oskarcon1 "		   // background
-		"xv 0 yv 16 picc 0 "
-		"xv 0 yv 50 picc 100 "
-		"xv 0 yv 100 picc 200 "
-		"xv 0 yv 200 picc 255 "
-		"xv 0 yv 25 cstring2 \"{}\" ",  // level name
-		"King Oskar");
+	helpString += FormatRect(Layout, 0);
+	helpString += " ";
+	helpString += FormatRect(R1, 25);
+	helpString += " ";
+	helpString += FormatRect(R2, 50);
+	helpString += " ";
+	helpString += FormatRect(R3, 75);
+	helpString += " ";
+	helpString += FormatRect(R4, 100);
+	helpString += " ";
+	helpString += FormatRect(R5, 125);
+	// helpString += " ";
+
+
+	// std::string helpString = "";
+	// helpString += G_Fmt(
+	// 	"xv 0 yv 8 picn oskarcon1");		   // background
+
+	// std::string helpString2 = "";
+	// helpString2 += G_Fmt(
+	// 	"xv 0 yv 16 picc 0 "
+	// 	"xv 0 yv 50 picc 100 "
+	// 	"xv 0 yv 100 picc 200 "
+	// 	"xv 0 yv 200 picc 255 ");
+
+	// std::string helpString3 = "";
+	// helpString2 += G_Fmt(
+	// 	"xv 0 yv 25 cstring2 \"{}\" ",  // level name
+	// 	"Testing");
 
 	gi.WriteByte(svc_layout);
 	gi.WriteString(helpString.c_str());
