@@ -66,9 +66,10 @@ std::string FormatRect(imq2_rect Rect, int Color)
 	return fmt::format("xl {} yt {} w {} h {} picc {}", x, y, w, h, Color);
 }
 
-void IMQ2Begin(imq2 *UI, imq2_rect Layout)
+void IMQ2Begin(imq2 *UI, imq2_rect Layout, bool Center)
 {
     UI->ElementCount = 0;
+    UI->Centered = Center;
 }
 
 void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle)
@@ -124,6 +125,11 @@ void IMQ2End(imq2 *UI)
 std::string IMQ2BuildUIString(imq2 *UI)
 {
     std::string helpString = "";
+    if (UI->Centered)
+    {
+        helpString += "imuic ";
+    }
+
 	for(int I = 0; I < UI->ElementCount; ++I)
 	{
 		imq2_ui_element *Element = UI->Elements + I;

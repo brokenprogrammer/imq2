@@ -51,6 +51,7 @@ struct imq2
     uint64_t ElementCount;
 
     imq2_ui_element *ActiveElement;
+    bool Centered;
 };
 
 imq2_rect CutLeft(imq2_rect *Rectangle, float Value);
@@ -61,7 +62,7 @@ imq2_rect_cut RectCut(imq2_rect *Rect, imq2_cut_side Side);
 imq2_rect RectCutCut(imq2_rect_cut RectCut, float Value);
 std::string FormatRect(imq2_rect Rect, int Color);
 
-void IMQ2Begin(imq2 *UI, imq2_rect Layout);
+void IMQ2Begin(imq2 *UI, imq2_rect Layout, bool Center = false);
 void IMQ2End(imq2 *UI);
 void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, imq2_rect Rectangle);
 void IMQ2Button(imq2 *UI, imq2_rect_cut Layout, float Value, const char *Label);

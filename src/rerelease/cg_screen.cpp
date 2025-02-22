@@ -804,15 +804,32 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
     int32_t if_depth = 0; // current if statement depth
     int32_t endif_depth = 0; // at this depth, toggle skip_depth
     bool skip_depth = false; // whether we're in a dead stmt or not
+    bool imq2Center = false;
 
     while (s)
     {
         token = COM_Parse (&s);
+        if (!strcmp(token, "imuic"))
+        {
+            // Make every xy value relative to center of screen?
+            imq2Center = true;
+            continue;
+        }
+
         if (!strcmp(token, "xl"))
         {
             token = COM_Parse (&s);
             if (!skip_depth)
-                x = ((hud_vrect.x + atoi(token)) * scale) + hud_safe.x;
+            {
+                if (imq2Center)
+                {
+                    x = (hud_vrect.x + hud_vrect.width/2 + (atoi(token) - hx)) * scale;
+                }
+                else
+                {
+                    x = ((hud_vrect.x + atoi(token)) * scale) + hud_safe.x;
+                }
+            }
             continue;
         }
         if (!strcmp(token, "xr"))
@@ -834,7 +851,16 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
         {
             token = COM_Parse (&s);
             if (!skip_depth)
-                y = ((hud_vrect.y + atoi(token)) * scale) + hud_safe.y;
+            {
+                if (imq2Center)
+                {
+                    y = (hud_vrect.y + hud_vrect.height/2 + (atoi(token) - hy)) * scale;
+                }
+                else
+                {
+                    y = ((hud_vrect.y + atoi(token)) * scale) + hud_safe.y;
+                }
+            }
             continue;
         }
         if (!strcmp(token, "yb"))

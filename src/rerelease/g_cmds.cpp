@@ -1674,7 +1674,7 @@ void Cmd_CustomUI_f(edict_t* ent)
     ent->movetype = MOVETYPE_NOCLIP;
 
 	imq2_rect Layout = { 0, 0, 360, 180 };
-	IMQ2Begin(&cl->UI, Layout);
+	IMQ2Begin(&cl->UI, Layout, true);
 	IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Upgrade", "w_blaster", "10x Damage");
 	CutLeft(&Layout, 10);
 	IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Boost", "i_health", "10 Bonus\nMax HP");
