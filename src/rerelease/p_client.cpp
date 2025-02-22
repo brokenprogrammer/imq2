@@ -3105,32 +3105,108 @@ void P_FallingDamage(edict_t *ent, const pmove_t &pm)
 
 bool HandleMenuMovement(edict_t *ent, usercmd_t *ucmd)
 {
-	if (!ent->client->menu)
-		return false;
-
-	// [Paril-KEX] handle menu movement
-	int32_t menu_sign = ucmd->forwardmove > 0 ? 1 : ucmd->forwardmove < 0 ? -1 : 0;
-
-	if (ent->client->menu_sign != menu_sign)
+	if (ent->client->showCustomUI)
 	{
-		ent->client->menu_sign = menu_sign;
+		// TODO(Oskar): Rework  this in order to be able to move both sideways and up and down.
+		int32_t menu_sign = ucmd->sidemove > 0 ? 1 : ucmd->sidemove < 0 ? -1 : 0;
+		if (ent->client->menu_sign != menu_sign)
+		{
+			ent->client->menu_sign = menu_sign;
 
-		if (menu_sign > 0)
-		{
-			PMenu_Prev(ent);
-			return true;
+			if (menu_sign < 0)
+			{
+				// Prev
+				if (ent->client->UI.ActiveElement->Index > 0)
+				{
+
+					uint64_t Index = ent->client->UI.ActiveElement->Index - 1;
+					for (uint64_t I = Index; Index >= 0; Index--)
+					{
+						imq2_ui_element *Element = ent->client->UI.Elements + Index;
+						if (!Element->Initialized)
+						{
+							break;
+						}
+						
+						if (Element->Flags & Element_Flag_Clickable)
+						{
+							ent->client->UI.ActiveElement = Element;
+							
+							std::string UIString = IMQ2BuildUIString(&ent->client->UI);
+							gi.WriteByte(svc_layout);
+							gi.WriteString(UIString.c_str());
+							gi.unicast(ent, true);
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+			else if (menu_sign > 0)
+			{
+				// Next
+				if (ent->client->UI.ActiveElement->Index < ent->client->UI.ElementCount - 1)
+				{
+					uint64_t Index = ent->client->UI.ActiveElement->Index + 1;
+					for (uint64_t I = Index; Index < ent->client->UI.ElementCount; Index++)
+					{
+						imq2_ui_element *Element = ent->client->UI.Elements + Index;
+						if (!Element->Initialized)
+						{
+							break;
+						}
+
+						if (Element->Flags & Element_Flag_Clickable)
+						{
+							ent->client->UI.ActiveElement = Element;
+
+							std::string UIString = IMQ2BuildUIString(&ent->client->UI);
+							gi.WriteByte(svc_layout);
+							gi.WriteString(UIString.c_str());
+							gi.unicast(ent, true);
+							return true;
+						}
+					}
+				}
+				return false;
+			}
 		}
-		else if (menu_sign < 0)
+
+		if (ent->client->latched_buttons & (BUTTON_ATTACK | BUTTON_JUMP))
 		{
-			PMenu_Next(ent);
+			gi.LocCenter_Print(ent, ent->client->UI.ActiveElement->String);
 			return true;
 		}
 	}
-
-	if (ent->client->latched_buttons & (BUTTON_ATTACK | BUTTON_JUMP))
+	else
 	{
-		PMenu_Select(ent);
-		return true;
+		if (!ent->client->menu)
+			return false;
+	
+		// [Paril-KEX] handle menu movement
+		int32_t menu_sign = ucmd->forwardmove > 0 ? 1 : ucmd->forwardmove < 0 ? -1 : 0;
+	
+		if (ent->client->menu_sign != menu_sign)
+		{
+			ent->client->menu_sign = menu_sign;
+	
+			if (menu_sign > 0)
+			{
+				PMenu_Prev(ent);
+				return true;
+			}
+			else if (menu_sign < 0)
+			{
+				PMenu_Next(ent);
+				return true;
+			}
+		}
+	
+		if (ent->client->latched_buttons & (BUTTON_ATTACK | BUTTON_JUMP))
+		{
+			PMenu_Select(ent);
+			return true;
+		}
 	}
 
 	return false;
@@ -3210,7 +3286,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 		
 		if (ent->movetype == MOVETYPE_NOCLIP)
 		{
-			if (ent->client->menu)
+			if (ent->client->menu || ent->client->showCustomUI)
 			{
 				client->ps.pmove.pm_type = PM_FREEZE;
 				

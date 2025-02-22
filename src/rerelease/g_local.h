@@ -2648,6 +2648,7 @@ constexpr spawnflags_t SPAWNFLAG_LANDMARK_KEEP_Z = 1_spawnflag;
 }
 
 #include "p_menu.h"
+#include "imq2.h"
 
 // ZOID
 #include "ctf/g_ctf.h"
@@ -3009,6 +3010,8 @@ struct gclient_t
 	gtime_t	 last_attacker_time;
 	// saved - for coop; last time we were in a firing state
 	gtime_t	 last_firing_time;
+
+	imq2 UI;
 };
 
 // ==========================================

@@ -11,6 +11,33 @@ void SelectNextItem(edict_t *ent, item_flags_t itflags, bool menu = true)
 
 	cl = ent->client;
 
+	if (cl->showCustomUI)
+	{
+		if (ent->client->UI.ActiveElement->Index < ent->client->UI.ElementCount - 1)
+		{
+			uint64_t Index = ent->client->UI.ActiveElement->Index + 1;
+			for (uint64_t I = Index; Index < ent->client->UI.ElementCount; Index++)
+			{
+				imq2_ui_element *Element = ent->client->UI.Elements + Index;
+				if (!Element->Initialized)
+				{
+					break;
+				}
+	
+				if (Element->Flags & Element_Flag_Clickable)
+				{
+					ent->client->UI.ActiveElement = Element;
+	
+					std::string UIString = IMQ2BuildUIString(&ent->client->UI);
+					gi.WriteByte(svc_layout);
+					gi.WriteString(UIString.c_str());
+					gi.unicast(ent, true);
+				}
+			}
+		}
+		return;
+	}
+
 	// ZOID
 	if (menu && cl->menu)
 	{
@@ -52,6 +79,33 @@ void SelectPrevItem(edict_t *ent, item_flags_t itflags)
 	gitem_t	*it;
 
 	cl = ent->client;
+
+	if (cl->showCustomUI)
+	{
+		if (ent->client->UI.ActiveElement->Index > 0)
+		{
+			uint64_t Index = ent->client->UI.ActiveElement->Index - 1;
+			for (uint64_t I = Index; Index >= 0; Index--)
+			{
+				imq2_ui_element *Element = ent->client->UI.Elements + Index;
+				if (!Element->Initialized)
+				{
+					break;
+				}
+				
+				if (Element->Flags & Element_Flag_Clickable)
+				{
+					ent->client->UI.ActiveElement = Element;
+					
+					std::string UIString = IMQ2BuildUIString(&ent->client->UI);
+					gi.WriteByte(svc_layout);
+					gi.WriteString(UIString.c_str());
+					gi.unicast(ent, true);
+				}
+			}
+		}
+		return;
+	}
 
 	// ZOID
 	if (cl->menu)
@@ -1595,7 +1649,6 @@ static void Cmd_ListMonsters_f(edict_t *ent)
 Cmd_CustomUI_f
 =================
 */
-#include "imq2.h"
 void Cmd_CustomUI_f(edict_t* ent)
 {
 	int		   i;
@@ -1612,54 +1665,26 @@ void Cmd_CustomUI_f(edict_t* ent)
 	if (cl->showCustomUI)
 	{
 		cl->showCustomUI = false;
+        ent->movetype = MOVETYPE_WALK;
 		globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
 		return;
 	}
 
 	cl->showCustomUI = true;
+    ent->movetype = MOVETYPE_NOCLIP;
 
-	imq2_rect Layout = { 0, 0, 180, 16 };
+	imq2_rect Layout = { 0, 0, 360, 180 };
+	IMQ2Begin(&cl->UI, Layout);
+	IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Upgrade", "w_blaster", "10x Damage");
+	CutLeft(&Layout, 10);
+	IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Boost", "i_health", "10 Bonus\nMax HP");
+	CutLeft(&Layout, 10);
+	IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Upgrade", "w_bfg", "2x Damage");
+    IMQ2End(&cl->UI);
 
-	imq2_rect R1 = CutLeft(&Layout, 16);
-	imq2_rect R2 = CutLeft(&Layout, 16);
-	imq2_rect R3 = CutLeft(&Layout, 16);
-
-	imq2_rect R4 = CutRight(&Layout, 16);
-	imq2_rect R5 = CutRight(&Layout, 16);
-
-	std::string helpString = "";
-	helpString += FormatRect(Layout, 0);
-	helpString += " ";
-	helpString += FormatRect(R1, 25);
-	helpString += " ";
-	helpString += FormatRect(R2, 50);
-	helpString += " ";
-	helpString += FormatRect(R3, 75);
-	helpString += " ";
-	helpString += FormatRect(R4, 100);
-	helpString += " ";
-	helpString += FormatRect(R5, 125);
-	// helpString += " ";
-
-
-	// std::string helpString = "";
-	// helpString += G_Fmt(
-	// 	"xv 0 yv 8 picn oskarcon1");		   // background
-
-	// std::string helpString2 = "";
-	// helpString2 += G_Fmt(
-	// 	"xv 0 yv 16 picc 0 "
-	// 	"xv 0 yv 50 picc 100 "
-	// 	"xv 0 yv 100 picc 200 "
-	// 	"xv 0 yv 200 picc 255 ");
-
-	// std::string helpString3 = "";
-	// helpString2 += G_Fmt(
-	// 	"xv 0 yv 25 cstring2 \"{}\" ",  // level name
-	// 	"Testing");
-
+	std::string UIString = IMQ2BuildUIString(&cl->UI);
 	gi.WriteByte(svc_layout);
-	gi.WriteString(helpString.c_str());
+	gi.WriteString(UIString.c_str());
 	gi.unicast(ent, true);
 }
 

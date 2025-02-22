@@ -1001,6 +1001,28 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             }
             continue;
         }
+        
+        if (!strcmp(token, "picnc"))
+        {   // draw a centered pic from a name
+            token = COM_Parse (&s);
+            if (!skip_depth)
+            {
+                cgi.Draw_GetPicSize(&w, &h, token);
+                cgi.SCR_DrawPic(x - ((w * scale) / 2), y - ((h * scale) / 2), w * scale, h * scale, token);
+            }
+            continue;
+        }
+
+        if (!strcmp(token, "picb"))
+        {   // draw a pic from a name fitting the size specified
+            token = COM_Parse (&s);
+            if (!skip_depth)
+            {
+                // cgi.Draw_GetPicSize(&w, &h, token);
+                cgi.SCR_DrawPic(x, y, w * scale, h * scale, token);
+            }
+            continue;
+        }
 
         if (!strcmp(token, "picc"))
         {
@@ -1161,6 +1183,16 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
                     CG_DrawString (x, y, scale, token);
                 else
                     cgi.SCR_DrawFontString(token, x, y - (font_y_offset * scale), scale, rgba_white, true, text_align_t::LEFT);
+            }
+            continue;
+        }
+
+        if (!strcmp(token, "stringc"))
+        {
+            token = COM_Parse (&s);
+            if (!skip_depth)
+            {
+                cgi.SCR_DrawFontString(token, x, y - (font_y_offset * scale), scale, rgba_white, true, text_align_t::CENTER);
             }
             continue;
         }
