@@ -67,6 +67,7 @@ void IMQ2End(imq2 *UI);
 void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, imq2_rect Rectangle);
 void IMQ2Button(imq2 *UI, imq2_rect_cut Layout, float Value, const char *Label);
 void IMQ2UpgradeSelectionButton(imq2 *UI, imq2_rect_cut Layout, float Value, const char *Label, const char *Pic, const char *Text);
+void IMQ2ProgressBar(imq2 *UI, imq2_rect_cut Layout, float Value, float Min, float Max, float Progress, const char *Label, const char *Pic);
 std::string IMQ2BuildUIString(imq2 *UI);
 
 // TODO(Oskar): Imlpement

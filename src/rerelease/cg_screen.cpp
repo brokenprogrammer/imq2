@@ -1,6 +1,7 @@
 // Copyright (c) ZeniMax Media Inc.
 // Licensed under the GNU General Public License 2.0.
 #include "cg_local.h"
+#include "imq2.h"
 
 constexpr int32_t STAT_MINUS      = 10;  // num frame for '-' stats digit
 constexpr const char *sb_nums[2][11] =
@@ -1826,7 +1827,21 @@ void CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect_t hud_vrect
     // inventory too
     if (ps->stats[STAT_LAYOUTS] & LAYOUTS_INVENTORY)
         CG_DrawInventory(ps, data->inventory, hud_vrect, scale);
-}
+
+    auto Vel = ps->pmove.velocity;
+    Vel[2] = 0;
+    auto Speed = Vel.length();
+    std::string SpeedString = fmt::format("{}", (int)Speed);
+
+    imq2_rect Layout = { 160 / 2, 215, 300, 240 };
+    imq2 UI;
+    IMQ2Begin(&UI, Layout, true);
+    IMQ2ProgressBar(&UI, RectCut(&Layout, Cut_Side_Left), 150, 0, 700, Speed, SpeedString.c_str(), "inventory_trans");
+    IMQ2End(&UI);
+
+    std::string UIString = IMQ2BuildUIString(&UI);
+    CG_ExecuteLayoutString(UIString.c_str(), hud_vrect, hud_safe, scale, playernum, ps);
+}   
 
 /*
 ================
