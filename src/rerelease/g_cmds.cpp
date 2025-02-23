@@ -1674,12 +1674,81 @@ void Cmd_CustomUI_f(edict_t* ent)
     ent->movetype = MOVETYPE_NOCLIP;
 
 	imq2_rect Layout = { 0, 0, 360, 180 };
-	IMQ2Begin(&cl->UI, Layout, true);
-	IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Upgrade", "w_blaster", "10x Damage");
-	CutLeft(&Layout, 10);
-	IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Boost", "i_health", "10 Bonus\nMax HP");
-	CutLeft(&Layout, 10);
-	IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Upgrade", "w_bfg", "2x Damage");
+	// imq2_rect Layout2 = { 200, 200, 50, 50 };
+	IMQ2Begin(&cl->UI, Layout);
+	
+	// NOTE(Oskar): Left aligned menu
+	imq2_rect Layout1 = { 0, 0, 300, 50 };
+	imq2_rect Layout1_Child = RectCutCut(RectCut(&Layout1, Cut_Side_Left), 50);
+	CutLeft(&Layout1, 10);
+	imq2_rect Layout1_Child2 = RectCutCut(RectCut(&Layout1, Cut_Side_Left), 50);
+	CutLeft(&Layout1, 10);
+	imq2_rect Layout1_Child3 = RectCutCut(RectCut(&Layout1, Cut_Side_Left), 50);
+	IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout1_Child,  Align_Type_Left);
+	IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout1_Child2, Align_Type_Left);
+	IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout1_Child3, Align_Type_Left);
+
+	// NOTE(Oskar): Left aligned menu cut from right
+	{
+		imq2_rect Layout1 = { 0, 75, 300, 75 + 50 };
+		imq2_rect Layout1_Child = RectCutCut(RectCut(&Layout1, Cut_Side_Right), 50);
+		CutRight(&Layout1, 10);
+		imq2_rect Layout1_Child2 = RectCutCut(RectCut(&Layout1, Cut_Side_Right), 50);
+		CutRight(&Layout1, 10);
+		imq2_rect Layout1_Child3 = RectCutCut(RectCut(&Layout1, Cut_Side_Right), 50);
+		IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout1_Child,  Align_Type_Left);
+		IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout1_Child2, Align_Type_Left);
+		IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout1_Child3, Align_Type_Left);
+	}
+	
+	// Right aligned menu cut from left
+	imq2_rect Layout2 = { 0, 0, 300, 50 };
+	imq2_rect Layout2_Child = RectCutCut(RectCut(&Layout2, Cut_Side_Left), 50);
+	CutLeft(&Layout2, 10);
+	imq2_rect Layout2_Child2 = RectCutCut(RectCut(&Layout2, Cut_Side_Left), 50);
+	CutLeft(&Layout2, 10);
+	imq2_rect Layout2_Child3 = RectCutCut(RectCut(&Layout2, Cut_Side_Left), 50);
+	IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout2_Child,  Align_Type_Right);
+	IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout2_Child2, Align_Type_Right);
+	IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout2_Child3, Align_Type_Right);
+
+	// Right aligned menu cut from right
+	{
+		imq2_rect Layout2 = { 0, 75, 300, 75 + 50 };
+		imq2_rect Layout2_Child = RectCutCut(RectCut(&Layout2, Cut_Side_Right), 50);
+		CutRight(&Layout2, 10);
+		imq2_rect Layout2_Child2 = RectCutCut(RectCut(&Layout2, Cut_Side_Right), 50);
+		CutRight(&Layout2, 10);
+		imq2_rect Layout2_Child3 = RectCutCut(RectCut(&Layout2, Cut_Side_Right), 50);
+		IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout2_Child,  Align_Type_Right);
+		IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout2_Child2, Align_Type_Right);
+		IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout2_Child3, Align_Type_Right);
+	}
+
+	// NOTE(Oskar): One centered element
+	{
+		imq2_rect Layout2 = { 0, 150, 50, 150 + 50 };
+		IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout2,  Align_Type_Center);
+	}
+
+	// NOTE(Oskar): Many centerd rectangles
+	{
+		imq2_rect Layout2 = { -60, 250, 150, 250 + 50 };
+		imq2_rect Layout2_Child = RectCutCut(RectCut(&Layout2, Cut_Side_Left), 50);
+		CutLeft(&Layout2, 10);
+		imq2_rect Layout2_Child2 = RectCutCut(RectCut(&Layout2, Cut_Side_Left), 50);
+		CutLeft(&Layout2, 10);
+		imq2_rect Layout2_Child3 = RectCutCut(RectCut(&Layout2, Cut_Side_Left), 50);
+		IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout2_Child,  Align_Type_Center);
+		IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout2_Child2,  Align_Type_Center);
+		IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout2_Child3,  Align_Type_Center);
+	}
+
+	// IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Upgrade", "w_blaster", "10x Damage");
+	// CutLeft(&Layout, 10);
+	// IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Boost", "i_health", "10 Bonus\nMax HP");
+	// CutLeft(&Layout, 10);
+	// IMQ2UpgradeSelectionButton(&cl->UI, RectCut(&Layout, Cut_Side_Left), 100, "Upgrade", "w_bfg", "2x Damage");
     IMQ2End(&cl->UI);
 
 	std::string UIString = IMQ2BuildUIString(&cl->UI);

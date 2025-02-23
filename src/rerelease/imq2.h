@@ -17,6 +17,15 @@ enum imq2_cut_side
     Cut_Side_Bottom,
 };
 
+enum  imq2_align_type 
+{
+    Align_Type_Left,    // xl: MinX is absolute left edge
+    Align_Type_Right,   // xr: MinX is offset from right edge
+    Align_Type_Center   // xc: MinX is offset from center
+};
+
+
+
 struct imq2_rect_cut
 {
     imq2_rect *Rectangle;
@@ -43,6 +52,7 @@ struct imq2_ui_element
     imq2_element_flags Flags;
     int ColorValue;
     const char *PicName;
+    imq2_align_type AlignTypeX;
 };
 
 struct imq2
@@ -51,7 +61,6 @@ struct imq2
     uint64_t ElementCount;
 
     imq2_ui_element *ActiveElement;
-    bool Centered;
 };
 
 imq2_rect CutLeft(imq2_rect *Rectangle, float Value);
@@ -62,9 +71,9 @@ imq2_rect_cut RectCut(imq2_rect *Rect, imq2_cut_side Side);
 imq2_rect RectCutCut(imq2_rect_cut RectCut, float Value);
 std::string FormatRect(imq2_rect Rect, int Color);
 
-void IMQ2Begin(imq2 *UI, imq2_rect Layout, bool Center = false);
+void IMQ2Begin(imq2 *UI, imq2_rect Layout);
 void IMQ2End(imq2 *UI);
-void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, imq2_rect Rectangle);
+void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle, imq2_align_type AlignType = Align_Type_Left);
 void IMQ2Button(imq2 *UI, imq2_rect_cut Layout, float Value, const char *Label);
 void IMQ2UpgradeSelectionButton(imq2 *UI, imq2_rect_cut Layout, float Value, const char *Label, const char *Pic, const char *Text);
 void IMQ2ProgressBar(imq2 *UI, imq2_rect_cut Layout, float Value, float Min, float Max, float Progress, const char *Label, const char *Pic);

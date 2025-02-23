@@ -66,13 +66,12 @@ std::string FormatRect(imq2_rect Rect, int Color)
 	return fmt::format("xl {} yt {} w {} h {} picc {}", x, y, w, h, Color);
 }
 
-void IMQ2Begin(imq2 *UI, imq2_rect Layout, bool Center)
+void IMQ2Begin(imq2 *UI, imq2_rect Layout)
 {
     UI->ElementCount = 0;
-    UI->Centered = Center;
 }
 
-void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle)
+void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle, imq2_align_type AlignType)
 {
     // imq2_ui_element *Element = (imq2_ui_element *)malloc(sizeof(imq2_ui_element));
 
@@ -84,6 +83,7 @@ void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, c
     Element->Flags = Flags;
     Element->ColorValue = 0; // TODO(Oskar)
     Element->PicName = PicName; // TODO(Oskar)
+    Element->AlignTypeX = AlignType;
 
     if (UI->ElementCount >= 1 && UI->ActiveElement == NULL)
     {
@@ -106,6 +106,7 @@ void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, c
     Element->Flags = Flags;
     Element->ColorValue = Color; // TODO(Oskar)
     Element->PicName = PicName; // TODO(Oskar)
+    Element->AlignTypeX = Align_Type_Left;
 
     if (UI->ElementCount >= 1 && UI->ActiveElement == NULL)
     {
@@ -165,18 +166,36 @@ void IMQ2End(imq2 *UI)
 std::string IMQ2BuildUIString(imq2 *UI)
 {
     std::string helpString = "";
-    if (UI->Centered)
-    {
-        helpString += "imuic ";
-    }
-
 	for(int I = 0; I < UI->ElementCount; ++I)
 	{
 		imq2_ui_element *Element = UI->Elements + I;
 		float x = Element->Rectangle.MinX;
 		float y = Element->Rectangle.MinY;
-		float w = Element->Rectangle.MaxX - Element->Rectangle.MinX;
+        float w = Element->Rectangle.MaxX - Element->Rectangle.MinX;
 		float h = Element->Rectangle.MaxY - Element->Rectangle.MinY;
+
+        // NOTE(Oskar): Handle alignment
+        std::string xToken;
+        switch (Element->AlignTypeX)
+        {
+            case Align_Type_Left:
+            {
+                xToken = "xl";
+            } break;
+
+            case Align_Type_Right:
+            {
+                xToken = "xr";
+                x = -Element->Rectangle.MinX - w;
+            } break;
+
+            case Align_Type_Center:
+            {
+                xToken = "xc";
+                x -= w / 2;
+            } break;
+        }
+
         float centerX = x + (w / 2);
         float centerX2 = x + (w / 4);
         float centerY = y + (h / 4);
@@ -184,24 +203,24 @@ std::string IMQ2BuildUIString(imq2 *UI)
 
         if (UI->ActiveElement == Element)
         {
-            helpString += fmt::format("xl {} yt {} w {} h {} picc {} ", x-1, y-1, w+2, h+2, 255);
+            helpString += fmt::format("{} {} yt {} w {} h {} picc {} ", xToken, x-1, y-1, w+2, h+2, 255);
         }
 
         if (Element->Flags & Element_Flag_DrawBackgroundPic)
         {
-            helpString += fmt::format("xl {} yt {} w {} h {} picb {} ", x, y, w, h, Element->PicName);
+            helpString += fmt::format("{} {} yt {} w {} h {} picb {} ", xToken, x, y, w, h, Element->PicName);
         }
         if (Element->Flags & Element_Flag_DrawBackground)
         {
-            helpString += fmt::format("xl {} yt {} w {} h {} picc {} ", x, y, w, h, Color);
+            helpString += fmt::format("{} {} yt {} w {} h {} picc {} ", xToken, x, y, w, h, Color);
         }
         if (Element->Flags & Element_Flag_DrawText)
         {
-            helpString += fmt::format("xl {} yt {} stringc \"{}\" ", centerX, centerY, Element->String);
+            helpString += fmt::format("{} {} yt {} stringc \"{}\" ", xToken, centerX, centerY, Element->String);
         }
         if (Element->Flags & Element_Flag_DrawPic)
         {
-            helpString += fmt::format("xl {} yt {} picnc {} ", centerX, centerY, Element->PicName);
+            helpString += fmt::format("{} {} yt {} picnc {} ", xToken, centerX, centerY, Element->PicName);
         }
 	}
     helpString.pop_back();

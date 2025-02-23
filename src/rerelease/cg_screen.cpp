@@ -805,31 +805,16 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
     int32_t if_depth = 0; // current if statement depth
     int32_t endif_depth = 0; // at this depth, toggle skip_depth
     bool skip_depth = false; // whether we're in a dead stmt or not
-    bool imq2Center = false;
 
     while (s)
     {
         token = COM_Parse (&s);
-        if (!strcmp(token, "imuic"))
-        {
-            // Make every xy value relative to center of screen?
-            imq2Center = true;
-            continue;
-        }
-
         if (!strcmp(token, "xl"))
         {
             token = COM_Parse (&s);
             if (!skip_depth)
             {
-                if (imq2Center)
-                {
-                    x = (hud_vrect.x + hud_vrect.width/2 + (atoi(token) - hx)) * scale;
-                }
-                else
-                {
-                    x = ((hud_vrect.x + atoi(token)) * scale) + hud_safe.x;
-                }
+                x = ((hud_vrect.x + atoi(token)) * scale) + hud_safe.x;
             }
             continue;
         }
@@ -847,20 +832,20 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
                 x = (hud_vrect.x + hud_vrect.width/2 + (atoi(token) - hx)) * scale;
             continue;
         }
+        if (!strcmp(token, "xc"))
+        {
+            token = COM_Parse (&s);
+            if (!skip_depth)
+                x = ((hud_vrect.x + hud_vrect.width / 2) + atoi(token)) * scale;
+            continue;
+        }
 
         if (!strcmp(token, "yt"))
         {
             token = COM_Parse (&s);
             if (!skip_depth)
             {
-                if (imq2Center)
-                {
-                    y = (hud_vrect.y + hud_vrect.height/2 + (atoi(token) - hy)) * scale;
-                }
-                else
-                {
-                    y = ((hud_vrect.y + atoi(token)) * scale) + hud_safe.y;
-                }
+                y = ((hud_vrect.y + atoi(token)) * scale) + hud_safe.y;
             }
             continue;
         }
@@ -1835,7 +1820,7 @@ void CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect_t hud_vrect
 
     imq2_rect Layout = { 160 / 2, 215, 300, 240 };
     imq2 UI;
-    IMQ2Begin(&UI, Layout, true);
+    IMQ2Begin(&UI, Layout);
     IMQ2ProgressBar(&UI, RectCut(&Layout, Cut_Side_Left), 150, 0, 700, Speed, SpeedString.c_str(), "inventory_trans");
     IMQ2End(&UI);
 
