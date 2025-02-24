@@ -41,6 +41,7 @@ void MoveClientToIntermission(edict_t *ent)
 	ent->client->showhelp = false;
 	ent->client->showscores = false;
 	ent->client->showCustomUI = false;
+	ent->client->ShowIMQ2LayoutExample = false;
 
 	globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
 
@@ -955,7 +956,8 @@ void G_SetStats(edict_t *ent)
 	}
 	else
 	{
-		if (ent->client->showscores || ent->client->showhelp || ent->client->showeou || ent->client->showCustomUI)
+		if (ent->client->showscores || ent->client->showhelp || ent->client->showeou || 
+			ent->client->showCustomUI || ent->client->ShowIMQ2LayoutExample)
 			ent->client->ps.stats[STAT_LAYOUTS] |= LAYOUTS_LAYOUT;
 		if (ent->client->showinventory && ent->client->pers.health > 0)
 			ent->client->ps.stats[STAT_LAYOUTS] |= LAYOUTS_INVENTORY;

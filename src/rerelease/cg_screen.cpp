@@ -1824,19 +1824,19 @@ void CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect_t hud_vrect
     if (ps->stats[STAT_LAYOUTS] & LAYOUTS_INVENTORY)
         CG_DrawInventory(ps, data->inventory, hud_vrect, scale);
 
-    auto Vel = ps->pmove.velocity;
-    Vel[2] = 0;
-    auto Speed = Vel.length();
-    std::string SpeedString = fmt::format("{}", (int)Speed);
+    // vec3_t Velocity = ps->pmove.velocity;
+    // Velocity[2] = 0;
+    // float Speed = Velocity.length();
+    // std::string SpeedString = fmt::format("{}", (int)Speed);
 
-    imq2_rect Layout = { 160 / 2, 215, 300, 240 };
-    imq2 UI;
-    IMQ2Begin(&UI, Layout);
-    IMQ2ProgressBar(&UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 150, 0, 700, Speed, SpeedString.c_str(), "inventory_trans");
-    IMQ2End(&UI);
+    // imq2_rect Layout = { 160 / 2, 215, 300, 240 };
+    // imq2 UI;
+    // IMQ2Begin(&UI, Layout);
+    // IMQ2ProgressBar(&UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 150, 0, 700, Speed, SpeedString.c_str(), "inventory_trans");
+    // IMQ2End(&UI);
 
-    std::string UIString = IMQ2BuildUIString(&UI);
-    CG_ExecuteLayoutString(UIString.c_str(), hud_vrect, hud_safe, scale, playernum, ps);
+    // std::string UIString = IMQ2BuildUIString(&UI);
+    // CG_ExecuteLayoutString(UIString.c_str(), hud_vrect, hud_safe, scale, playernum, ps);
 }   
 
 /*

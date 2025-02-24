@@ -11,33 +11,6 @@ void SelectNextItem(edict_t *ent, item_flags_t itflags, bool menu = true)
 
 	cl = ent->client;
 
-	if (cl->showCustomUI)
-	{
-		if (ent->client->UI.ActiveElement->Index < ent->client->UI.ElementCount - 1)
-		{
-			uint64_t Index = ent->client->UI.ActiveElement->Index + 1;
-			for (uint64_t I = Index; Index < ent->client->UI.ElementCount; Index++)
-			{
-				imq2_ui_element *Element = ent->client->UI.Elements + Index;
-				if (!Element->Initialized)
-				{
-					break;
-				}
-	
-				if (Element->Flags & Element_Flag_Clickable)
-				{
-					ent->client->UI.ActiveElement = Element;
-	
-					std::string UIString = IMQ2BuildUIString(&ent->client->UI);
-					gi.WriteByte(svc_layout);
-					gi.WriteString(UIString.c_str());
-					gi.unicast(ent, true);
-				}
-			}
-		}
-		return;
-	}
-
 	// ZOID
 	if (menu && cl->menu)
 	{
@@ -79,33 +52,6 @@ void SelectPrevItem(edict_t *ent, item_flags_t itflags)
 	gitem_t	*it;
 
 	cl = ent->client;
-
-	if (cl->showCustomUI)
-	{
-		if (ent->client->UI.ActiveElement->Index > 0)
-		{
-			uint64_t Index = ent->client->UI.ActiveElement->Index - 1;
-			for (uint64_t I = Index; Index >= 0; Index--)
-			{
-				imq2_ui_element *Element = ent->client->UI.Elements + Index;
-				if (!Element->Initialized)
-				{
-					break;
-				}
-				
-				if (Element->Flags & Element_Flag_Clickable)
-				{
-					ent->client->UI.ActiveElement = Element;
-					
-					std::string UIString = IMQ2BuildUIString(&ent->client->UI);
-					gi.WriteByte(svc_layout);
-					gi.WriteString(UIString.c_str());
-					gi.unicast(ent, true);
-				}
-			}
-		}
-		return;
-	}
 
 	// ZOID
 	if (cl->menu)
@@ -790,6 +736,8 @@ void Cmd_Inven_f(edict_t *ent)
 
 	cl->showscores = false;
 	cl->showhelp = false;
+	cl->showCustomUI = false;
+	cl->ShowIMQ2LayoutExample = false;
 
 	globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
 
@@ -1150,6 +1098,8 @@ void Cmd_PutAway_f(edict_t *ent)
 	ent->client->showscores = false;
 	ent->client->showhelp = false;
 	ent->client->showinventory = false;
+	ent->client->showCustomUI = false;
+	ent->client->ShowIMQ2LayoutExample = false;
 
 	globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
 
@@ -1659,18 +1609,64 @@ void Cmd_CustomUI_f(edict_t* ent)
 	cl->showscores = false;
 	cl->showinventory = false;
 	cl->showhelp = false;
+	cl->ShowIMQ2LayoutExample = false;
 
-	globals.server_flags |= SERVER_FLAG_SLOW_TIME;
+	// globals.server_flags |= SERVER_FLAG_SLOW_TIME;
 
 	if (cl->showCustomUI)
 	{
 		cl->showCustomUI = false;
         ent->movetype = MOVETYPE_WALK;
-		globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
+		// globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
 		return;
 	}
 
 	cl->showCustomUI = true;
+    ent->movetype = MOVETYPE_NOCLIP;
+
+	imq2_rect Layout = { 0, 0, 360, 180 };
+	IMQ2Begin(&cl->UI, Layout);
+	IMQ2UpgradeSelectionButton(&cl->UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 100, "Upgrade", "w_blaster", "10x Damage");
+	IMQ2SliceLeft(&Layout, 10);
+	IMQ2UpgradeSelectionButton(&cl->UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 100, "Boost", "i_health", "10 Bonus\nMax HP");
+	IMQ2SliceLeft(&Layout, 10);
+	IMQ2UpgradeSelectionButton(&cl->UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 100, "Upgrade", "w_bfg", "2x Damage");
+    IMQ2End(&cl->UI);
+
+	std::string UIString = IMQ2BuildUIString(&cl->UI);
+	gi.WriteByte(svc_layout);
+	gi.WriteString(UIString.c_str());
+	gi.unicast(ent, true);
+}
+
+/*
+=================
+Cmd_ShowIMQ2LayoutExample_f
+=================
+*/
+void Cmd_ShowIMQ2LayoutExample_f(edict_t *ent)
+{
+	int		   i;
+	gclient_t* cl;
+
+	cl = ent->client;
+
+	cl->showscores = false;
+	cl->showinventory = false;
+	cl->showhelp = false;
+	cl->showCustomUI = false;
+
+	globals.server_flags |= SERVER_FLAG_SLOW_TIME;
+
+	if (cl->ShowIMQ2LayoutExample)
+	{
+		cl->ShowIMQ2LayoutExample = false;
+        ent->movetype = MOVETYPE_WALK;
+		globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
+		return;
+	}
+
+	cl->ShowIMQ2LayoutExample = true;
     ent->movetype = MOVETYPE_NOCLIP;
 
 	imq2_rect Layout = { 0, 0, 360, 180 };
@@ -1956,6 +1952,10 @@ void ClientCommand(edict_t *ent)
 	else if (Q_strcasecmp(cmd, "customUI") == 0)
 	{
 		Cmd_CustomUI_f(ent);
+	}
+	else if (Q_strcasecmp(cmd, "imq2example1") == 0)
+	{
+		Cmd_ShowIMQ2LayoutExample_f(ent);
 	}
 #ifndef KEX_Q2_GAME
 	else // anything that doesn't match a command will be a chat

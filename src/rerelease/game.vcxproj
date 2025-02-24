@@ -139,7 +139,6 @@
     <ClInclude Include="m_soldier.h" />
     <ClInclude Include="m_supertank.h" />
     <ClInclude Include="m_tank.h" />
-    <ClInclude Include="p_menu.h" />
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
     <ClInclude Include="rogue\m_rogue_carrier.h" />
@@ -207,7 +206,6 @@
     <ClCompile Include="m_tank.cpp" />
     <ClCompile Include="p_client.cpp" />
     <ClCompile Include="p_hud.cpp" />
-    <ClCompile Include="p_menu.cpp" />
     <ClCompile Include="p_move.cpp" />
     <ClCompile Include="p_trail.cpp" />
     <ClCompile Include="p_view.cpp" />

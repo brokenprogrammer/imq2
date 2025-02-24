@@ -199,6 +199,132 @@ void IMQ2Begin(imq2 *UI, imq2_rect Layout)
     UI->DefaultStyle.VerticalAlignment = imq2_vertical_align::Top;
 }
 
+
+void IMQ2End(imq2 *UI)
+{
+
+}
+
+bool IMQ2NavigateNext(imq2 *UI)
+{
+    bool Result = false;
+
+    if (UI->ActiveElement->Index < UI->ElementCount - 1)
+    {
+        uint64_t StartingIndex = UI->ActiveElement->Index + 1;
+        for (uint64_t Index = StartingIndex; Index < UI->ElementCount; Index++)
+        {
+            imq2_ui_element *Element = UI->Elements + Index;
+            if (!Element->Initialized)
+            {
+                break;
+            }
+
+            if (Element->Flags & Element_Flag_Clickable)
+            {
+                UI->ActiveElement = Element;
+                Result = true;
+                break;
+            }
+        }
+    }
+
+    return (Result);
+}
+
+bool IMQ2NavigatePrevious(imq2 *UI)
+{
+    bool Result = false;
+    if (UI->ActiveElement->Index > 0)
+    {
+        uint64_t StartingIndex = UI->ActiveElement->Index - 1;
+        for (uint64_t Index = StartingIndex; Index >= 0; Index--)
+        {
+            imq2_ui_element *Element = UI->Elements + Index;
+            if (!Element->Initialized)
+            {
+                break;
+            }
+            
+            if (Element->Flags & Element_Flag_Clickable)
+            {
+                UI->ActiveElement = Element;
+                Result = true;
+                break;
+            }
+        }
+    }
+
+    return (Result);
+}
+
+std::string IMQ2BuildUIString(imq2 *UI)
+{
+    std::string UIString = "";
+	for(int Index = 0; Index < UI->ElementCount; ++Index)
+	{
+		imq2_ui_element *Element = UI->Elements + Index;
+		float X = Element->Rectangle.MinX;
+		float Y = Element->Rectangle.MinY;
+        float W = Element->Rectangle.MaxX - Element->Rectangle.MinX;
+		float H = Element->Rectangle.MaxY - Element->Rectangle.MinY;
+
+        // NOTE(Oskar): Handle alignment
+        std::string XToken;
+        switch (Element->HorizontalAlign)
+        {
+            case imq2_horizontal_align::Left:
+            {
+                XToken = "xl";
+            } break;
+
+            case imq2_horizontal_align::Right:
+            {
+                XToken = "xr";
+                X = -Element->Rectangle.MinX - W;
+            } break;
+
+            case imq2_horizontal_align::Center:
+            {
+                XToken = "xc";
+                X -= W / 2;
+            } break;
+        }
+
+        float CenterX = X + (W / 2);
+        float CenterX2 = X + (W / 4);
+        float CenterY = Y + (H / 4);
+        imq2_color Color = Element->BackgroundColor; // TODO(Oskar): Serialize propperly
+
+        if (UI->ActiveElement == Element)
+        {
+            // TODO(Oskar): Make this color base of something else or allow user to specify it.
+            imq2_color HighLightColor = { 57, 255, 20, 255 };
+            UIString += fmt::format("{} {} yt {} w {} h {} col {} {} {} {} ", XToken, X-1, Y-1, W+2, H+2, HighLightColor.R, HighLightColor.G, HighLightColor.B, HighLightColor.A);
+        }
+
+        if (Element->Flags & Element_Flag_DrawBackgroundPic)
+        {
+            UIString += fmt::format("{} {} yt {} w {} h {} picb {} ", XToken, X, Y, W, H, Element->PicName);
+        }
+        if (Element->Flags & Element_Flag_DrawBackground)
+        {
+            UIString += fmt::format("{} {} yt {} w {} h {} col {} {} {} {} ", XToken, X, Y, W, H, Color.R, Color.G, Color.B, Color.A);
+        }
+        if (Element->Flags & Element_Flag_DrawText)
+        {
+            UIString += fmt::format("{} {} yt {} stringc \"{}\" ", XToken, CenterX, CenterY, Element->String);
+        }
+        if (Element->Flags & Element_Flag_DrawPic)
+        {
+            UIString += fmt::format("{} {} yt {} picnc {} ", XToken, CenterX, CenterY, Element->PicName);
+        }
+	}
+    UIString.pop_back();
+
+    return (UIString);
+}
+
 void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle)
 {
     imq2_ui_element *Element = UI->Elements + UI->ElementCount++;
@@ -269,76 +395,4 @@ void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, f
     IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
 
     IMQ2ElementCreate(UI, Element_Flag_DrawText, Label, NULL, RectangleCopy);
-}
-
-void IMQ2End(imq2 *UI)
-{
-
-}
-
-std::string IMQ2BuildUIString(imq2 *UI)
-{
-    std::string UIString = "";
-	for(int Index = 0; Index < UI->ElementCount; ++Index)
-	{
-		imq2_ui_element *Element = UI->Elements + Index;
-		float x = Element->Rectangle.MinX;
-		float y = Element->Rectangle.MinY;
-        float w = Element->Rectangle.MaxX - Element->Rectangle.MinX;
-		float h = Element->Rectangle.MaxY - Element->Rectangle.MinY;
-
-        // NOTE(Oskar): Handle alignment
-        std::string xToken;
-        switch (Element->HorizontalAlign)
-        {
-            case imq2_horizontal_align::Left:
-            {
-                xToken = "xl";
-            } break;
-
-            case imq2_horizontal_align::Right:
-            {
-                xToken = "xr";
-                x = -Element->Rectangle.MinX - w;
-            } break;
-
-            case imq2_horizontal_align::Center:
-            {
-                xToken = "xc";
-                x -= w / 2;
-            } break;
-        }
-
-        float centerX = x + (w / 2);
-        float centerX2 = x + (w / 4);
-        float centerY = y + (h / 4);
-        imq2_color Color = Element->BackgroundColor; // TODO(Oskar): Serialize propperly
-
-        if (UI->ActiveElement == Element)
-        {
-            // TODO(Oskar): Make this color base of something else or allow user to specify it.
-            imq2_color HighLightColor = { 255, 255, 255, 255 };
-            UIString += fmt::format("{} {} yt {} w {} h {} col {} {} {} {} ", xToken, x-1, y-1, w+2, h+2, Color.R, Color.G, Color.B, Color.A);
-        }
-
-        if (Element->Flags & Element_Flag_DrawBackgroundPic)
-        {
-            UIString += fmt::format("{} {} yt {} w {} h {} picb {} ", xToken, x, y, w, h, Element->PicName);
-        }
-        if (Element->Flags & Element_Flag_DrawBackground)
-        {
-            UIString += fmt::format("{} {} yt {} w {} h {} col {} {} {} {} ", xToken, x, y, w, h, Color.R, Color.G, Color.B, Color.A);
-        }
-        if (Element->Flags & Element_Flag_DrawText)
-        {
-            UIString += fmt::format("{} {} yt {} stringc \"{}\" ", xToken, centerX, centerY, Element->String);
-        }
-        if (Element->Flags & Element_Flag_DrawPic)
-        {
-            UIString += fmt::format("{} {} yt {} picnc {} ", xToken, centerX, centerY, Element->PicName);
-        }
-	}
-    UIString.pop_back();
-
-    return UIString;
 }

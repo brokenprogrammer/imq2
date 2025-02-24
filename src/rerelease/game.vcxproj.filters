@@ -77,7 +77,6 @@
     <ClInclude Include="xatrix\m_xatrix_gekk.h">
       <Filter>xatrix</Filter>
     </ClInclude>
-    <ClInclude Include="p_menu.h" />
     <ClInclude Include="imq2.h" />
   </ItemGroup>
   <ItemGroup>
@@ -249,7 +248,6 @@
     <ClCompile Include="xatrix\p_xatrix_weapon.cpp">
       <Filter>xatrix</Filter>
     </ClCompile>
-    <ClCompile Include="p_menu.cpp" />
     <ClCompile Include="imq2.cpp" />
   </ItemGroup>
   <ItemGroup>

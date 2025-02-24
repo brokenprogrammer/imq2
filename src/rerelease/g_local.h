@@ -2647,7 +2647,6 @@ constexpr spawnflags_t SPAWNFLAG_LANDMARK_KEEP_Z = 1_spawnflag;
 	return G_PowerUpExpiringRelative(time - level.time);
 }
 
-#include "p_menu.h"
 #include "imq2.h"
 
 // ZOID
@@ -2839,6 +2838,7 @@ struct gclient_t
 	bool showinventory; // set layout stat
 	bool showhelp;
 	bool showCustomUI;
+	bool ShowIMQ2LayoutExample;
 
 	button_t buttons;
 	button_t oldbuttons;

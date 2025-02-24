@@ -3116,59 +3116,30 @@ bool HandleMenuMovement(edict_t *ent, usercmd_t *ucmd)
 			if (menu_sign < 0)
 			{
 				// Prev
-				if (ent->client->UI.ActiveElement->Index > 0)
+				bool Result = IMQ2NavigatePrevious(&ent->client->UI);
+				if (Result)
 				{
-
-					uint64_t Index = ent->client->UI.ActiveElement->Index - 1;
-					for (uint64_t I = Index; Index >= 0; Index--)
-					{
-						imq2_ui_element *Element = ent->client->UI.Elements + Index;
-						if (!Element->Initialized)
-						{
-							break;
-						}
-						
-						if (Element->Flags & Element_Flag_Clickable)
-						{
-							ent->client->UI.ActiveElement = Element;
-							
-							std::string UIString = IMQ2BuildUIString(&ent->client->UI);
-							gi.WriteByte(svc_layout);
-							gi.WriteString(UIString.c_str());
-							gi.unicast(ent, true);
-							return true;
-						}
-					}
+					std::string UIString = IMQ2BuildUIString(&ent->client->UI);
+					gi.WriteByte(svc_layout);
+					gi.WriteString(UIString.c_str());
+					gi.unicast(ent, true);
 				}
-				return false;
+
+				return (Result);
 			}
 			else if (menu_sign > 0)
 			{
 				// Next
-				if (ent->client->UI.ActiveElement->Index < ent->client->UI.ElementCount - 1)
+				bool Result = IMQ2NavigateNext(&ent->client->UI);
+				if (Result)
 				{
-					uint64_t Index = ent->client->UI.ActiveElement->Index + 1;
-					for (uint64_t I = Index; Index < ent->client->UI.ElementCount; Index++)
-					{
-						imq2_ui_element *Element = ent->client->UI.Elements + Index;
-						if (!Element->Initialized)
-						{
-							break;
-						}
-
-						if (Element->Flags & Element_Flag_Clickable)
-						{
-							ent->client->UI.ActiveElement = Element;
-
-							std::string UIString = IMQ2BuildUIString(&ent->client->UI);
-							gi.WriteByte(svc_layout);
-							gi.WriteString(UIString.c_str());
-							gi.unicast(ent, true);
-							return true;
-						}
-					}
+					std::string UIString = IMQ2BuildUIString(&ent->client->UI);
+					gi.WriteByte(svc_layout);
+					gi.WriteString(UIString.c_str());
+					gi.unicast(ent, true);
 				}
-				return false;
+
+				return (Result);
 			}
 		}
 
