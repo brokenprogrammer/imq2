@@ -2,37 +2,37 @@
 #include "imq2.h"
 #include <assert.h>
 
-imq2_rect IMQ2SliceLeft(imq2_rect *Rectangle, float Value)
+imq2_rect IMQ2SliceLeft(imq2_rect *Rectangle, float Amount)
 {
     float MinX = Rectangle->MinX;
-    Rectangle->MinX = min(Rectangle->MaxX, Rectangle->MinX + Value);
+    Rectangle->MinX = min(Rectangle->MaxX, Rectangle->MinX + Amount);
 
     imq2_rect Result = { MinX, Rectangle->MinY, Rectangle->MinX, Rectangle->MaxY };
     return (Result);
 }
 
-imq2_rect IMQ2SliceRight(imq2_rect *Rectangle, float Value)
+imq2_rect IMQ2SliceRight(imq2_rect *Rectangle, float Amount)
 {
     float MaxX = Rectangle->MaxX;
-    Rectangle->MaxX = max(Rectangle->MinX, Rectangle->MaxX - Value);
+    Rectangle->MaxX = max(Rectangle->MinX, Rectangle->MaxX - Amount);
 
     imq2_rect Result = { Rectangle->MaxX, Rectangle->MinY, MaxX, Rectangle->MaxY };
     return (Result);
 }
 
-imq2_rect IMQ2SliceTop(imq2_rect *Rectangle, float Value)
+imq2_rect IMQ2SliceTop(imq2_rect *Rectangle, float Amount)
 {
     float MinY = Rectangle->MinY;
-    Rectangle->MinY = min(Rectangle->MaxY, Rectangle->MinY + Value);
+    Rectangle->MinY = min(Rectangle->MaxY, Rectangle->MinY + Amount);
 
     imq2_rect Result = { Rectangle->MinX, MinY, Rectangle->MaxX, Rectangle->MinY };
     return (Result);
 }
 
-imq2_rect IMQ2SliceBottom(imq2_rect *Rectangle, float Value)
+imq2_rect IMQ2SliceBottom(imq2_rect *Rectangle, float Amount)
 {
     float MaxY  = Rectangle->MaxY;
-    Rectangle->MaxY = max(Rectangle->MinY, Rectangle->MaxY - Value);
+    Rectangle->MaxY = max(Rectangle->MinY, Rectangle->MaxY - Amount);
 
     imq2_rect Result = { Rectangle->MinX, Rectangle->MaxY, Rectangle->MaxX, MaxY };
     return (Result);
@@ -44,17 +44,74 @@ imq2_rect_slice IMQ2PrepareSlice(imq2_rect *Rectangle, imq2_slice_side Side)
     return (Result);
 }
 
-imq2_rect IMQ2ApplySlice(imq2_rect_slice RectangleSlice, float Value)
+imq2_rect IMQ2ApplySlice(imq2_rect_slice RectangleSlice, float Amount)
 {
     switch (RectangleSlice.Side)
     {
-        case Slice_Side_Left:     return IMQ2SliceLeft(RectangleSlice.Rectangle, Value);
-        case Slice_Side_Right:    return IMQ2SliceRight(RectangleSlice.Rectangle, Value);
-        case Slice_Side_Top:      return IMQ2SliceTop(RectangleSlice.Rectangle, Value);
-        case Slice_Side_Bottom:   return IMQ2SliceBottom(RectangleSlice.Rectangle, Value);
+        case Slice_Side_Left:     return IMQ2SliceLeft(RectangleSlice.Rectangle, Amount);
+        case Slice_Side_Right:    return IMQ2SliceRight(RectangleSlice.Rectangle, Amount);
+        case Slice_Side_Top:      return IMQ2SliceTop(RectangleSlice.Rectangle, Amount);
+        case Slice_Side_Bottom:   return IMQ2SliceBottom(RectangleSlice.Rectangle, Amount);
         default: abort();
     }
 }
+
+imq2_rect IMQ2PeekLeft(const imq2_rect* Rectangle, float Amount)
+{
+    float MaxX = min(Rectangle->MaxX, Rectangle->MinX + Amount);
+
+    imq2_rect Result = { Rectangle->MinX, Rectangle->MinY, MaxX, Rectangle->MaxY };
+    return (Result);
+}
+
+imq2_rect IMQ2PeekRight(const imq2_rect* Rectangle, float Amount)
+{
+    float MinX = max(Rectangle->MinX, Rectangle->MaxX - Amount);
+    
+    imq2_rect Result = { MinX, Rectangle->MinY, Rectangle->MaxX, Rectangle->MaxY };
+    return (Result);
+}
+
+imq2_rect IMQ2PeekTop(const imq2_rect* Rectangle, float Amount)
+{
+    float MaxY = min(Rectangle->MaxY, Rectangle->MinY + Amount);
+    
+    imq2_rect Result = { Rectangle->MinX, Rectangle->MinY, Rectangle->MaxX, MaxY };
+    return (Result);
+}
+
+imq2_rect IMQ2PeekBottom(const imq2_rect* Rectangle, float Amount)
+{
+    float MinY = max(Rectangle->MinY, Rectangle->MaxY - Amount);
+    
+    imq2_rect Result = { Rectangle->MinX, MinY, Rectangle->MaxX, Rectangle->MaxY };
+    return (Result);
+}
+
+imq2_rect IMQ2GrowLeft(const imq2_rect* Rectangle, float Amount)
+{
+    imq2_rect Result = { Rectangle->MinX - Amount, Rectangle->MinY, Rectangle->MaxX, Rectangle->MaxY };
+    return (Result);
+}
+
+imq2_rect IMQ2GrowRight(const imq2_rect* Rectangle, float Amount)
+{
+    imq2_rect Result = { Rectangle->MinX, Rectangle->MinY, Rectangle->MaxX + Amount, Rectangle->MaxY };
+    return (Result);
+}
+
+imq2_rect IMQ2GrowTop(const imq2_rect* Rectangle, float Amount)
+{
+    imq2_rect Result = { Rectangle->MinX, Rectangle->MinY - Amount, Rectangle->MaxX, Rectangle->MaxY };
+    return (Result);
+}
+
+imq2_rect IMQ2GrowBottom(const imq2_rect* Rectangle, float Amount)
+{
+    imq2_rect Result = { Rectangle->MinX, Rectangle->MinY, Rectangle->MaxX, Rectangle->MaxY + Amount };
+    return (Result);
+}
+
 
 void IMQ2PushBackgroundColor(imq2 *UI, imq2_color Color)
 {

@@ -99,12 +99,24 @@ struct imq2
 };
 
 // NOTE(Oskar): Layouting
-imq2_rect       IMQ2SliceLeft(imq2_rect *Rectangle,             float Value);
-imq2_rect       IMQ2SliceRight(imq2_rect *Rectangle,            float Value);
-imq2_rect       IMQ2SliceTop(imq2_rect *Rectangle,              float Value);
-imq2_rect       IMQ2SliceBottom(imq2_rect *Rectangle,           float Value);
+imq2_rect       IMQ2SliceLeft(imq2_rect *Rectangle,             float Amount);
+imq2_rect       IMQ2SliceRight(imq2_rect *Rectangle,            float Amount);
+imq2_rect       IMQ2SliceTop(imq2_rect *Rectangle,              float Amount);
+imq2_rect       IMQ2SliceBottom(imq2_rect *Rectangle,           float Amount);
 imq2_rect_slice IMQ2PrepareSlice(imq2_rect *Rectangle,          imq2_slice_side Side);
-imq2_rect       IMQ2ApplySlice(imq2_rect_slice RectangleSlice,  float Value);
+imq2_rect       IMQ2ApplySlice(imq2_rect_slice RectangleSlice,  float Amount);
+
+// NOTE(Oskar): Non-destructive, same as slice but doesn't modify given Rectangle.
+imq2_rect IMQ2PeekLeft(const imq2_rect* Rectangle,      float Amount);
+imq2_rect IMQ2PeekRight(const imq2_rect* Rectangle,     float Amount);
+imq2_rect IMQ2PeekTop(const imq2_rect* Rectangle,       float Amount);
+imq2_rect IMQ2PeekBottom(const imq2_rect* Rectangle,    float Amount);
+
+// NOTE(Oskar): Add rectangle outside of given rectangle. 
+imq2_rect IMQ2GrowLeft(const imq2_rect* Rectangle,      float Amount);
+imq2_rect IMQ2GrowRight(const imq2_rect* Rectangle,     float Amount);
+imq2_rect IMQ2GrowTop(const imq2_rect* Rectangle,       float Amount);
+imq2_rect IMQ2GrowBottom(const imq2_rect* Rectangle,    float Amount);
 
 // NOTE(Oskar): Stacks
 void IMQ2PushBackgroundColor(imq2 *UI, imq2_color Color);
@@ -127,19 +139,3 @@ void IMQ2Button(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label
 void IMQ2UpgradeSelectionButton(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label, const char *Pic, const char *Text);
 void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, float Max, float Progress, const char *Label, const char *Pic);
 std::string IMQ2BuildUIString(imq2 *UI);
-
-// TODO(Oskar): Imlpement
-// Same as cut, except they keep the input rect intact.
-// Useful for decorations (9-patch-much?).
-imq2_rect get_left(const imq2_rect* rect, float a);
-imq2_rect get_right(const imq2_rect* rect, float a);
-imq2_rect get_top(const imq2_rect* rect, float a);
-imq2_rect get_bottom(const imq2_rect* rect, float a);
-
-// TODO(Oskar): Implement
-// These will add a rectangle outside of the input rectangle.
-// Useful for tooltips and other overlay elements.
-imq2_rect add_left(const imq2_rect* rect, float a);
-imq2_rect add_right(const imq2_rect* rect, float a);
-imq2_rect add_top(const imq2_rect* rect, float a);
-imq2_rect add_bottom(const imq2_rect* rect, float a);
