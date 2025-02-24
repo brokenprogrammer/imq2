@@ -385,12 +385,62 @@ void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, f
     }
     IMQ2PopBackgroundColor(UI);
 
+    // TODO(Oskar): I do not really want this rectangle to grow from the middle out but I need to implement some sort of relative
+    // alignment so that when I use horizontal align left in thins method we will align it to the left of its parent sort of..
+    // For now I will just leave this as is..
     imq2_rect ProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Left), ProgressWidth);
+
     IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
     {
         IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle);
     }
     IMQ2PopBackgroundColor(UI);
+    
+    IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
+
+    IMQ2ElementCreate(UI, Element_Flag_DrawText, Label, NULL, RectangleCopy);
+}
+
+void IMQ2Speedometer(imq2 *UI, imq2_rect_slice Layout, float Value, float Progress, const char *Label, const char *Pic)
+{
+    imq2_rect Rectangle = IMQ2ApplySlice(Layout, Value);
+
+    float TotalWidth = Rectangle.MaxX - Rectangle.MinX;;
+    float FirstProgressBarMin = 0;
+    float FirstProgressBarMax = 500;
+    float FirstProgressWidth = TotalWidth * (Progress - FirstProgressBarMin) / (FirstProgressBarMax - FirstProgressBarMin);
+
+    float SecondProgressBarMin = 500;
+    float SecondProgressBarMax = 1250;
+    float SecondProgressWidth = TotalWidth * (Progress - SecondProgressBarMin) / (SecondProgressBarMax - SecondProgressBarMin);
+    imq2_rect SecondProgressRectangleCopy = { Rectangle.MinX, Rectangle.MinY, Rectangle.MaxX, Rectangle.MaxY };
+
+    imq2_rect RectangleCopy = { Rectangle.MinX, Rectangle.MinY, Rectangle.MaxX, Rectangle.MaxY };
+    IMQ2PushBackgroundColor(UI, {0, 0, 0, 255});
+    {
+        IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy);
+    }
+    IMQ2PopBackgroundColor(UI);
+
+    // TODO(Oskar): I do not really want this rectangle to grow from the middle out but I need to implement some sort of relative
+    // alignment so that when I use horizontal align left in thins method we will align it to the left of its parent sort of..
+    // For now I will just leave this as is..
+    imq2_rect ProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Left), FirstProgressWidth);
+    IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
+    {
+        IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle);
+    }
+    IMQ2PopBackgroundColor(UI);
+
+    if (Progress >= 500)
+    {
+        imq2_rect SecondProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&SecondProgressRectangleCopy, Slice_Side_Left), SecondProgressWidth);
+        IMQ2PushBackgroundColor(UI, {255, 0, 0, 255});
+        {
+            IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, SecondProgressRectangle);
+        }
+        IMQ2PopBackgroundColor(UI);
+    }
     
     IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
 

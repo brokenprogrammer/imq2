@@ -30,6 +30,9 @@ static cvar_t *scr_maxlines;
 static cvar_t *ui_acc_contrast;
 static cvar_t* ui_acc_alttypeface;
 
+static cvar_t* speedometer;
+static cvar_t* strafehelper;
+
 // static temp data used for hud
 static struct
 {
@@ -1824,19 +1827,26 @@ void CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect_t hud_vrect
     if (ps->stats[STAT_LAYOUTS] & LAYOUTS_INVENTORY)
         CG_DrawInventory(ps, data->inventory, hud_vrect, scale);
 
-    // vec3_t Velocity = ps->pmove.velocity;
-    // Velocity[2] = 0;
-    // float Speed = Velocity.length();
-    // std::string SpeedString = fmt::format("{}", (int)Speed);
-
-    // imq2_rect Layout = { 160 / 2, 215, 300, 240 };
-    // imq2 UI;
-    // IMQ2Begin(&UI, Layout);
-    // IMQ2ProgressBar(&UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 150, 0, 700, Speed, SpeedString.c_str(), "inventory_trans");
-    // IMQ2End(&UI);
-
-    // std::string UIString = IMQ2BuildUIString(&UI);
-    // CG_ExecuteLayoutString(UIString.c_str(), hud_vrect, hud_safe, scale, playernum, ps);
+    if (speedometer->integer)
+    {
+        vec3_t Velocity = ps->pmove.velocity;
+        Velocity[2] = 0;
+        float Speed = Velocity.length();
+        std::string SpeedString = fmt::format("{}", (int)Speed);
+    
+        imq2_rect Layout = { 0, 215, 150, 240 };
+        imq2 UI;
+        IMQ2Begin(&UI, Layout);
+        IMQ2PushHorizontalAlignment(&UI, imq2_horizontal_align::Center);
+        {
+            IMQ2Speedometer(&UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 150, Speed, SpeedString.c_str(), "inventory_trans");
+        }
+        IMQ2PopHorizontalAlignment(&UI);
+        IMQ2End(&UI);
+    
+        std::string UIString = IMQ2BuildUIString(&UI);
+        CG_ExecuteLayoutString(UIString.c_str(), hud_vrect, hud_safe, scale, playernum, ps);
+    }
 }   
 
 /*
@@ -1868,6 +1878,9 @@ void CG_InitScreen()
     scr_maxlines    = cgi.cvar ("scr_maxlines", "4",      CVAR_ARCHIVE);
     ui_acc_contrast = cgi.cvar ("ui_acc_contrast", "0",   CVAR_NOFLAGS);
     ui_acc_alttypeface = cgi.cvar("ui_acc_alttypeface", "0", CVAR_NOFLAGS);
+
+    speedometer = cgi.cvar("speedometer", "0", CVAR_LATCH);
+    strafehelper = cgi.cvar("strafehelper", "0", CVAR_LATCH);
 
     hud_data = {};
 }
