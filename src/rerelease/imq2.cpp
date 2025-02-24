@@ -1,8 +1,8 @@
 #include "g_local.h"
-
 #include "imq2.h"
+#include <assert.h>
 
-imq2_rect CutLeft(imq2_rect *Rectangle, float Value)
+imq2_rect IMQ2SliceLeft(imq2_rect *Rectangle, float Value)
 {
     float MinX = Rectangle->MinX;
     Rectangle->MinX = min(Rectangle->MaxX, Rectangle->MinX + Value);
@@ -11,7 +11,7 @@ imq2_rect CutLeft(imq2_rect *Rectangle, float Value)
     return (Result);
 }
 
-imq2_rect CutRight(imq2_rect *Rectangle, float Value)
+imq2_rect IMQ2SliceRight(imq2_rect *Rectangle, float Value)
 {
     float MaxX = Rectangle->MaxX;
     Rectangle->MaxX = max(Rectangle->MinX, Rectangle->MaxX - Value);
@@ -20,7 +20,7 @@ imq2_rect CutRight(imq2_rect *Rectangle, float Value)
     return (Result);
 }
 
-imq2_rect CutTop(imq2_rect *Rectangle, float Value)
+imq2_rect IMQ2SliceTop(imq2_rect *Rectangle, float Value)
 {
     float MinY = Rectangle->MinY;
     Rectangle->MinY = min(Rectangle->MaxY, Rectangle->MinY + Value);
@@ -29,7 +29,7 @@ imq2_rect CutTop(imq2_rect *Rectangle, float Value)
     return (Result);
 }
 
-imq2_rect CutBottom(imq2_rect *Rectangle, float Value)
+imq2_rect IMQ2SliceBottom(imq2_rect *Rectangle, float Value)
 {
     float MaxY  = Rectangle->MaxY;
     Rectangle->MaxY = max(Rectangle->MinY, Rectangle->MaxY - Value);
@@ -38,52 +38,123 @@ imq2_rect CutBottom(imq2_rect *Rectangle, float Value)
     return (Result);
 }
 
-imq2_rect_cut RectCut(imq2_rect *Rect, imq2_cut_side Side)
+imq2_rect_slice IMQ2PrepareSlice(imq2_rect *Rectangle, imq2_slice_side Side)
 {
-    imq2_rect_cut Result = { Rect, Side };
+    imq2_rect_slice Result = { Rectangle, Side };
     return (Result);
 }
 
-imq2_rect RectCutCut(imq2_rect_cut RectCut, float Value)
+imq2_rect IMQ2ApplySlice(imq2_rect_slice RectangleSlice, float Value)
 {
-    switch (RectCut.Side)
+    switch (RectangleSlice.Side)
     {
-        case Cut_Side_Left:     return CutLeft(RectCut.Rectangle, Value);
-        case Cut_Side_Right:    return CutRight(RectCut.Rectangle, Value);
-        case Cut_Side_Top:      return CutTop(RectCut.Rectangle, Value);
-        case Cut_Side_Bottom:   return CutBottom(RectCut.Rectangle, Value);
+        case Slice_Side_Left:     return IMQ2SliceLeft(RectangleSlice.Rectangle, Value);
+        case Slice_Side_Right:    return IMQ2SliceRight(RectangleSlice.Rectangle, Value);
+        case Slice_Side_Top:      return IMQ2SliceTop(RectangleSlice.Rectangle, Value);
+        case Slice_Side_Bottom:   return IMQ2SliceBottom(RectangleSlice.Rectangle, Value);
         default: abort();
     }
 }
 
-std::string FormatRect(imq2_rect Rect, int Color)
+void IMQ2PushBackgroundColor(imq2 *UI, imq2_color Color)
 {
-	float x = Rect.MinX;
-	float y = Rect.MinY;
-	float w = Rect.MaxX - Rect.MinX;
-	float h = Rect.MaxY - Rect.MinY;
+    assert(UI->BackgroundColorStackCount < IMQ2_STACK_MAX);
+    UI->BackgroundColorStack[UI->BackgroundColorStackCount++] = Color;
+}
 
-	return fmt::format("xl {} yt {} w {} h {} picc {}", x, y, w, h, Color);
+void IMQ2PopBackgroundColor(imq2 *UI)
+{
+    if (UI->BackgroundColorStackCount)
+    {
+        --UI->BackgroundColorStackCount;
+    }
+}
+
+imq2_color IMQ2PeekBackgroundColor(imq2 *UI)
+{
+    if (UI->BackgroundColorStackCount == 0)
+    {
+        return UI->DefaultStyle.BackgroundColor;
+    }
+
+    return UI->BackgroundColorStack[UI->BackgroundColorStackCount - 1];
+}
+
+void IMQ2PushHorizontalAlignment(imq2 *UI, imq2_horizontal_align Alignment)
+{
+    assert(UI->HorizontalAlignmentStackCount < IMQ2_STACK_MAX);
+    UI->HorizontalAlignmentStack[UI->HorizontalAlignmentStackCount++] = Alignment;
+}
+
+void IMQ2PopHorizontalAlignment(imq2 *UI)
+{
+    if (UI->HorizontalAlignmentStackCount)
+    {
+        --UI->HorizontalAlignmentStackCount;
+    }
+}
+
+imq2_horizontal_align IMQ2PeekHorizontalAlignment(imq2 *UI)
+{
+    if (UI->HorizontalAlignmentStackCount == 0)
+    {
+        return UI->DefaultStyle.HorizontalAlignment;
+    }
+
+    return UI->HorizontalAlignmentStack[UI->HorizontalAlignmentStackCount - 1];
+}
+
+void IMQ2PushVerticalAlignment(imq2 *UI, imq2_vertical_align Alignment)
+{
+    assert(UI->VerticalAlignmentStackCount < IMQ2_STACK_MAX);
+    UI->VerticalAlignmentStack[UI->VerticalAlignmentStackCount++] = Alignment;
+}
+
+void IMQ2PopVerticalAlignment(imq2 *UI)
+{
+    if (UI->VerticalAlignmentStackCount)
+    {
+        --UI->VerticalAlignmentStackCount;
+    }
+}
+
+imq2_vertical_align IMQ2PeekVerticalAlignment(imq2 *UI)
+{
+    if (UI->VerticalAlignmentStackCount == 0)
+    {
+        return UI->DefaultStyle.VerticalAlignment;
+    }
+
+    return UI->VerticalAlignmentStack[UI->VerticalAlignmentStackCount - 1];
 }
 
 void IMQ2Begin(imq2 *UI, imq2_rect Layout)
 {
     UI->ElementCount = 0;
+
+    UI->BackgroundColorStackCount = 0;
+    UI->HorizontalAlignmentStackCount = 0;
+    UI->VerticalAlignmentStackCount = 0;
+
+    UI->DefaultStyle = {};
+    UI->DefaultStyle.BackgroundColor = { 0, 0, 0, 255 };
+    UI->DefaultStyle.HorizontalAlignment = imq2_horizontal_align::Left;
+    UI->DefaultStyle.VerticalAlignment = imq2_vertical_align::Top;
 }
 
-void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle, imq2_align_type AlignType)
+void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle)
 {
-    // imq2_ui_element *Element = (imq2_ui_element *)malloc(sizeof(imq2_ui_element));
-
     imq2_ui_element *Element = UI->Elements + UI->ElementCount++;
     Element->Index = UI->ElementCount - 1;
     Element->Initialized = true;
     Element->Rectangle = Rectangle;
     Element->String = String;
     Element->Flags = Flags;
-    Element->ColorValue = 0; // TODO(Oskar)
-    Element->PicName = PicName; // TODO(Oskar)
-    Element->AlignTypeX = AlignType;
+    Element->PicName = PicName;
+
+    Element->BackgroundColor = IMQ2PeekBackgroundColor(UI);
+    Element->HorizontalAlign = IMQ2PeekHorizontalAlignment(UI);
+    Element->VerticalAlign = IMQ2PeekVerticalAlignment(UI);
 
     if (UI->ElementCount >= 1 && UI->ActiveElement == NULL)
     {
@@ -94,64 +165,49 @@ void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, c
     }
 }
 
-void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle, int Color)
+void IMQ2Button(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label)
 {
-    // imq2_ui_element *Element = (imq2_ui_element *)malloc(sizeof(imq2_ui_element));
-
-    imq2_ui_element *Element = UI->Elements + UI->ElementCount++;
-    Element->Index = UI->ElementCount - 1;
-    Element->Initialized = true;
-    Element->Rectangle = Rectangle;
-    Element->String = String;
-    Element->Flags = Flags;
-    Element->ColorValue = Color; // TODO(Oskar)
-    Element->PicName = PicName; // TODO(Oskar)
-    Element->AlignTypeX = Align_Type_Left;
-
-    if (UI->ElementCount >= 1 && UI->ActiveElement == NULL)
-    {
-        if (Element->Flags & Element_Flag_Clickable)
-        {
-            UI->ActiveElement = Element;
-        }
-    }
-}
-
-void IMQ2Button(imq2 *UI, imq2_rect_cut Layout, float Value, const char *Label)
-{
-    imq2_rect Rectangle = RectCutCut(Layout, Value);
+    imq2_rect Rectangle = IMQ2ApplySlice(Layout, Value);
 
     IMQ2ElementCreate(UI, (Element_Flag_Clickable | Element_Flag_DrawBackground | Element_Flag_DrawText), Label, NULL, Rectangle);
 }
 
-void IMQ2UpgradeSelectionButton(imq2 *UI, imq2_rect_cut Layout, float Value, const char *Label, const char *Pic, const char *Text)
+void IMQ2UpgradeSelectionButton(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label, const char *Pic, const char *Text)
 {
-    imq2_rect Rectangle = RectCutCut(Layout, Value);
+    imq2_rect Rectangle = IMQ2ApplySlice(Layout, Value);
 
     IMQ2ElementCreate(UI, (Element_Flag_Clickable | Element_Flag_DrawBackgroundPic), NULL, "backtile", Rectangle);
     
-    imq2_rect LabelRectangle = RectCutCut(RectCut(&Rectangle, Cut_Side_Top), 30);
+    imq2_rect LabelRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Top), 30);
     IMQ2ElementCreate(UI, (Element_Flag_DrawText), Label, NULL, LabelRectangle);
 
-    imq2_rect PicRectangle = RectCutCut(RectCut(&Rectangle, Cut_Side_Top), 50);
+    imq2_rect PicRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Top), 50);
     IMQ2ElementCreate(UI, (Element_Flag_DrawPic), NULL, Pic, PicRectangle);
 
-    imq2_rect TextRectangle = RectCutCut(RectCut(&Rectangle, Cut_Side_Top), 60);
+    imq2_rect TextRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Top), 60);
     IMQ2ElementCreate(UI, (Element_Flag_DrawText), Text, NULL, TextRectangle);
 }
 
-void IMQ2ProgressBar(imq2 *UI, imq2_rect_cut Layout, float Value, float Min, float Max, float Progress, const char *Label, const char *Pic)
+void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, float Max, float Progress, const char *Label, const char *Pic)
 {
-    imq2_rect Rectangle = RectCutCut(Layout, Value);
+    imq2_rect Rectangle = IMQ2ApplySlice(Layout, Value);
 
     float TotalWidth = Rectangle.MaxX - Rectangle.MinX;;
     float ProgressWidth = TotalWidth * (Progress - Min) / (Max - Min);
 
     imq2_rect RectangleCopy = { Rectangle.MinX, Rectangle.MinY, Rectangle.MaxX, Rectangle.MaxY };
-    IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy, 0);
-    
-    imq2_rect ProgressRectangle = RectCutCut(RectCut(&Rectangle, Cut_Side_Left), ProgressWidth);
-    IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle, 100);
+    IMQ2PushBackgroundColor(UI, {0, 0, 0, 255});
+    {
+        IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy);
+    }
+    IMQ2PopBackgroundColor(UI);
+
+    imq2_rect ProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Left), ProgressWidth);
+    IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
+    {
+        IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle);
+    }
+    IMQ2PopBackgroundColor(UI);
     
     IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
 
@@ -165,10 +221,10 @@ void IMQ2End(imq2 *UI)
 
 std::string IMQ2BuildUIString(imq2 *UI)
 {
-    std::string helpString = "";
-	for(int I = 0; I < UI->ElementCount; ++I)
+    std::string UIString = "";
+	for(int Index = 0; Index < UI->ElementCount; ++Index)
 	{
-		imq2_ui_element *Element = UI->Elements + I;
+		imq2_ui_element *Element = UI->Elements + Index;
 		float x = Element->Rectangle.MinX;
 		float y = Element->Rectangle.MinY;
         float w = Element->Rectangle.MaxX - Element->Rectangle.MinX;
@@ -176,20 +232,20 @@ std::string IMQ2BuildUIString(imq2 *UI)
 
         // NOTE(Oskar): Handle alignment
         std::string xToken;
-        switch (Element->AlignTypeX)
+        switch (Element->HorizontalAlign)
         {
-            case Align_Type_Left:
+            case imq2_horizontal_align::Left:
             {
                 xToken = "xl";
             } break;
 
-            case Align_Type_Right:
+            case imq2_horizontal_align::Right:
             {
                 xToken = "xr";
                 x = -Element->Rectangle.MinX - w;
             } break;
 
-            case Align_Type_Center:
+            case imq2_horizontal_align::Center:
             {
                 xToken = "xc";
                 x -= w / 2;
@@ -199,31 +255,33 @@ std::string IMQ2BuildUIString(imq2 *UI)
         float centerX = x + (w / 2);
         float centerX2 = x + (w / 4);
         float centerY = y + (h / 4);
-        float Color = Element->ColorValue;
+        imq2_color Color = Element->BackgroundColor; // TODO(Oskar): Serialize propperly
 
         if (UI->ActiveElement == Element)
         {
-            helpString += fmt::format("{} {} yt {} w {} h {} picc {} ", xToken, x-1, y-1, w+2, h+2, 255);
+            // TODO(Oskar): Make this color base of something else or allow user to specify it.
+            imq2_color HighLightColor = { 255, 255, 255, 255 };
+            UIString += fmt::format("{} {} yt {} w {} h {} col {} {} {} {} ", xToken, x-1, y-1, w+2, h+2, Color.R, Color.G, Color.B, Color.A);
         }
 
         if (Element->Flags & Element_Flag_DrawBackgroundPic)
         {
-            helpString += fmt::format("{} {} yt {} w {} h {} picb {} ", xToken, x, y, w, h, Element->PicName);
+            UIString += fmt::format("{} {} yt {} w {} h {} picb {} ", xToken, x, y, w, h, Element->PicName);
         }
         if (Element->Flags & Element_Flag_DrawBackground)
         {
-            helpString += fmt::format("{} {} yt {} w {} h {} picc {} ", xToken, x, y, w, h, Color);
+            UIString += fmt::format("{} {} yt {} w {} h {} col {} {} {} {} ", xToken, x, y, w, h, Color.R, Color.G, Color.B, Color.A);
         }
         if (Element->Flags & Element_Flag_DrawText)
         {
-            helpString += fmt::format("{} {} yt {} stringc \"{}\" ", xToken, centerX, centerY, Element->String);
+            UIString += fmt::format("{} {} yt {} stringc \"{}\" ", xToken, centerX, centerY, Element->String);
         }
         if (Element->Flags & Element_Flag_DrawPic)
         {
-            helpString += fmt::format("{} {} yt {} picnc {} ", xToken, centerX, centerY, Element->PicName);
+            UIString += fmt::format("{} {} yt {} picnc {} ", xToken, centerX, centerY, Element->PicName);
         }
 	}
-    helpString.pop_back();
+    UIString.pop_back();
 
-    return helpString;
+    return UIString;
 }

@@ -1036,15 +1036,26 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             continue;
         }
 
-        if (!strcmp(token, "picc"))
+        if (!strcmp(token, "col"))
         {
             // draw a pic from color
+            rgba_t Color = {};
+
             token = COM_Parse(&s);
-            int ColorValue = atoi(token);
+            Color.r = atoi(token);
+
+            token = COM_Parse(&s);
+            Color.g = atoi(token);
+
+            token = COM_Parse(&s);
+            Color.b = atoi(token);
+
+            token = COM_Parse(&s);
+            Color.a = atoi(token);
+
             if (!skip_depth)
             {
-                rgba_t c = { ColorValue, ColorValue, ColorValue, 255 };
-                cgi.SCR_DrawColorPic(x, y, w* scale, h* scale, "_white", c);
+                cgi.SCR_DrawColorPic(x, y, w* scale, h* scale, "_white", Color);
             }
         }
 
@@ -1821,7 +1832,7 @@ void CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect_t hud_vrect
     imq2_rect Layout = { 160 / 2, 215, 300, 240 };
     imq2 UI;
     IMQ2Begin(&UI, Layout);
-    IMQ2ProgressBar(&UI, RectCut(&Layout, Cut_Side_Left), 150, 0, 700, Speed, SpeedString.c_str(), "inventory_trans");
+    IMQ2ProgressBar(&UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 150, 0, 700, Speed, SpeedString.c_str(), "inventory_trans");
     IMQ2End(&UI);
 
     std::string UIString = IMQ2BuildUIString(&UI);
