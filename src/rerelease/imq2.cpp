@@ -185,10 +185,37 @@ imq2_vertical_align IMQ2PeekVerticalAlignment(imq2 *UI)
     return UI->VerticalAlignmentStack[UI->VerticalAlignmentStackCount - 1];
 }
 
+void IMQ2PushParent(imq2 *UI, imq2_ui_element *Parent)
+{
+    assert(UI->ParentStackCount < IMQ2_STACK_MAX);
+
+    Parent->IsParent = true;
+    UI->ParentStack[UI->ParentStackCount++] = Parent;
+}
+
+void IMQ2PopParent(imq2 *UI)
+{
+    if (UI->ParentStackCount)
+    {
+        --UI->ParentStackCount;
+    }
+}
+
+imq2_ui_element *IMQ2PeekParentStack(imq2 *UI)
+{
+    if (UI->ParentStackCount == 0)
+    {
+        return NULL;
+    }
+
+    return UI->ParentStack[UI->ParentStackCount - 1];
+}
+
 void IMQ2Begin(imq2 *UI, imq2_rect Layout)
 {
     UI->ElementCount = 0;
 
+    UI->ParentStackCount = 0;
     UI->BackgroundColorStackCount = 0;
     UI->HorizontalAlignmentStackCount = 0;
     UI->VerticalAlignmentStackCount = 0;
@@ -296,6 +323,16 @@ std::string IMQ2BuildUIString(imq2 *UI)
         float CenterY = Y + (H / 4);
         imq2_color Color = Element->BackgroundColor; // TODO(Oskar): Serialize propperly
 
+        if (Element->IsParent)
+        {
+            UIString += "par ";
+        }
+
+        if (Element->Parent)
+        {
+            UIString += "rel ";
+        }
+
         if (UI->ActiveElement == Element)
         {
             // TODO(Oskar): Make this color base of something else or allow user to specify it.
@@ -319,22 +356,27 @@ std::string IMQ2BuildUIString(imq2 *UI)
         {
             UIString += fmt::format("{} {} yt {} picnc {} ", XToken, CenterX, CenterY, Element->PicName);
         }
+
+        // NOTE(Oskar): Used to mark end of UI element, this resets parent and relative flag.
+        UIString += "; ";
 	}
     UIString.pop_back();
 
     return (UIString);
 }
 
-void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle)
+imq2_ui_element *IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle)
 {
     imq2_ui_element *Element = UI->Elements + UI->ElementCount++;
     Element->Index = UI->ElementCount - 1;
     Element->Initialized = true;
+    Element->IsParent = false;
     Element->Rectangle = Rectangle;
     Element->String = String;
     Element->Flags = Flags;
     Element->PicName = PicName;
 
+    Element->Parent = IMQ2PeekParentStack(UI);
     Element->BackgroundColor = IMQ2PeekBackgroundColor(UI);
     Element->HorizontalAlign = IMQ2PeekHorizontalAlignment(UI);
     Element->VerticalAlign = IMQ2PeekVerticalAlignment(UI);
@@ -346,6 +388,8 @@ void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, c
             UI->ActiveElement = Element;
         }
     }
+
+    return (Element);
 }
 
 void IMQ2Button(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label)
@@ -373,6 +417,7 @@ void IMQ2UpgradeSelectionButton(imq2 *UI, imq2_rect_slice Layout, float Value, c
 
 void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, float Max, float Progress, const char *Label, const char *Pic)
 {
+    imq2_ui_element *Parent = NULL;
     imq2_rect Rectangle = IMQ2ApplySlice(Layout, Value);
 
     float TotalWidth = Rectangle.MaxX - Rectangle.MinX;;
@@ -381,21 +426,25 @@ void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, f
     imq2_rect RectangleCopy = { Rectangle.MinX, Rectangle.MinY, Rectangle.MaxX, Rectangle.MaxY };
     IMQ2PushBackgroundColor(UI, {0, 0, 0, 255});
     {
-        IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy);
+        Parent = IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy);
     }
     IMQ2PopBackgroundColor(UI);
 
-    // TODO(Oskar): I do not really want this rectangle to grow from the middle out but I need to implement some sort of relative
-    // alignment so that when I use horizontal align left in thins method we will align it to the left of its parent sort of..
-    // For now I will just leave this as is..
     imq2_rect ProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Left), ProgressWidth);
-
-    IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
+    IMQ2PushParent(UI, Parent);
     {
-        IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle);
+        IMQ2PushHorizontalAlignment(UI, imq2_horizontal_align::Left);
+        {
+            IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
+            {
+                IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle);
+            }
+            IMQ2PopBackgroundColor(UI);
+        }
+        IMQ2PopHorizontalAlignment(UI);
     }
-    IMQ2PopBackgroundColor(UI);
-    
+    IMQ2PopParent(UI);
+
     IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
 
     IMQ2ElementCreate(UI, Element_Flag_DrawText, Label, NULL, RectangleCopy);
@@ -403,6 +452,7 @@ void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, f
 
 void IMQ2Speedometer(imq2 *UI, imq2_rect_slice Layout, float Value, float Progress, const char *Label, const char *Pic)
 {
+    imq2_ui_element *Parent = NULL;
     imq2_rect Rectangle = IMQ2ApplySlice(Layout, Value);
 
     float TotalWidth = Rectangle.MaxX - Rectangle.MinX;;
@@ -418,29 +468,35 @@ void IMQ2Speedometer(imq2 *UI, imq2_rect_slice Layout, float Value, float Progre
     imq2_rect RectangleCopy = { Rectangle.MinX, Rectangle.MinY, Rectangle.MaxX, Rectangle.MaxY };
     IMQ2PushBackgroundColor(UI, {0, 0, 0, 255});
     {
-        IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy);
+        Parent = IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy);
     }
     IMQ2PopBackgroundColor(UI);
 
-    // TODO(Oskar): I do not really want this rectangle to grow from the middle out but I need to implement some sort of relative
-    // alignment so that when I use horizontal align left in thins method we will align it to the left of its parent sort of..
-    // For now I will just leave this as is..
     imq2_rect ProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Left), FirstProgressWidth);
-    IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
+    IMQ2PushParent(UI, Parent);
     {
-        IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle);
-    }
-    IMQ2PopBackgroundColor(UI);
-
-    if (Progress >= 500)
-    {
-        imq2_rect SecondProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&SecondProgressRectangleCopy, Slice_Side_Left), SecondProgressWidth);
-        IMQ2PushBackgroundColor(UI, {255, 0, 0, 255});
+        IMQ2PushHorizontalAlignment(UI, imq2_horizontal_align::Left);
         {
-            IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, SecondProgressRectangle);
+
+            IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
+            {
+                IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle);
+            }
+            IMQ2PopBackgroundColor(UI);
+            
+            if (Progress >= 500)
+            {
+                imq2_rect SecondProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&SecondProgressRectangleCopy, Slice_Side_Left), SecondProgressWidth);
+                IMQ2PushBackgroundColor(UI, {255, 0, 0, 255});
+                {
+                    IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, SecondProgressRectangle);
+                }
+                IMQ2PopBackgroundColor(UI);
+            }
         }
-        IMQ2PopBackgroundColor(UI);
+        IMQ2PopHorizontalAlignment(UI);
     }
+    IMQ2PopParent(UI);
     
     IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
 

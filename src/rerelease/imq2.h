@@ -60,12 +60,14 @@ struct imq2_ui_element
 {
     uint64_t Index;
     bool Initialized;
-
+    bool IsParent;      // NOTE(Oskar): Set when pushing element as a parent in order to tell layouting to store coords.
+    
     imq2_rect Rectangle;
     const char *String;
     imq2_element_flags Flags;
     const char *PicName;
     
+    imq2_ui_element *Parent;
     imq2_color BackgroundColor;
     imq2_horizontal_align HorizontalAlign;
     imq2_vertical_align VerticalAlign;
@@ -96,6 +98,9 @@ struct imq2
 
     uint64_t VerticalAlignmentStackCount;
     imq2_vertical_align VerticalAlignmentStack[IMQ2_STACK_MAX];
+
+    uint64_t ParentStackCount;
+    imq2_ui_element *ParentStack[IMQ2_STACK_MAX];
 };
 
 // NOTE(Oskar): Layouting
@@ -131,6 +136,10 @@ void IMQ2PushVerticalAlignment(imq2 *UI, imq2_vertical_align Alignment);
 void IMQ2PopVerticalAlignment(imq2 *UI);
 imq2_vertical_align IMQ2PeekVerticalAlignment(imq2 *UI);
 
+void IMQ2PushParent(imq2 *UI, imq2_ui_element *Parent);
+void IMQ2PopParent(imq2 *UI);
+imq2_ui_element *IMQ2PeekParentStack(imq2 *UI);
+
 // NOTE(Oskar): UI stuff
 void IMQ2Begin(imq2 *UI, imq2_rect Layout);
 void IMQ2End(imq2 *UI);
@@ -138,7 +147,7 @@ bool IMQ2NavigateNext(imq2 *UI);
 bool IMQ2NavigatePrevious(imq2 *UI);
 std::string IMQ2BuildUIString(imq2 *UI);
 
-void IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle);
+imq2_ui_element *IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const char *String, const char *PicName, imq2_rect Rectangle);
 void IMQ2Button(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label);
 void IMQ2UpgradeSelectionButton(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label, const char *Pic, const char *Text);
 void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, float Max, float Progress, const char *Label, const char *Pic);

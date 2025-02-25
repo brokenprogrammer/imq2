@@ -2,6 +2,7 @@
 // Licensed under the GNU General Public License 2.0.
 #include "cg_local.h"
 #include "imq2.h"
+#include <assert.h>
 
 constexpr int32_t STAT_MINUS      = 10;  // num frame for '-' stats digit
 constexpr const char *sb_nums[2][11] =
@@ -792,6 +793,69 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
     int     width;
     int     index;
 
+    // NOTE(Oskar): Used for parent / child handling of relative coordinates.
+
+    // TODO(Oskar): There is nothing that clears or pops these stacks, 
+    // how should we deal with that, just make the arrays bigger and forget about it?
+    uint64_t ParentXStackCount = 0;
+    int ParentXStack[IMQ2_STACK_MAX];
+    
+    uint64_t ParentWidthStackCount = 0;
+    int ParentWidthStack[IMQ2_STACK_MAX];
+
+    uint64_t ParentYStackCount = 0;
+    int ParentYStack[IMQ2_STACK_MAX];
+    
+    uint64_t ParentHeightStackCount = 0;
+    int ParentHeightStack[IMQ2_STACK_MAX];
+    
+    bool IsParent = false;
+    bool IsRelative = false;
+    
+    auto PushParentX = [&ParentXStackCount, &ParentXStack](int X) 
+    {
+        assert(ParentXStackCount < IMQ2_STACK_MAX);
+        ParentXStack[ParentXStackCount++] = X;
+    };
+    auto PeekParentXStack = [&ParentXStackCount, &ParentXStack]()
+    {
+        assert(ParentXStackCount > 0);
+        return ParentXStack[ParentXStackCount - 1];
+    };
+
+    auto PushParentWidth = [&ParentWidthStackCount, &ParentWidthStack](int Width) 
+    {
+        assert(ParentWidthStackCount < IMQ2_STACK_MAX);
+        ParentWidthStack[ParentWidthStackCount++] = Width;
+    };
+    auto PeekParentWidthStack = [&ParentWidthStackCount, &ParentWidthStack]()
+    {
+        assert(ParentWidthStackCount > 0);
+        return ParentWidthStack[ParentWidthStackCount - 1];
+    };
+
+    auto PushParentY = [&ParentYStackCount, &ParentYStack](int Y) 
+    {
+        assert(ParentYStackCount < IMQ2_STACK_MAX);
+        ParentYStack[ParentYStackCount++] = Y;
+    };
+    auto PeekParentYStack = [&ParentYStackCount, &ParentYStack]()
+    {
+        assert(ParentYStackCount > 0);
+        return ParentYStack[ParentYStackCount - 1];
+    };
+
+    auto PushParentHeight = [&ParentHeightStackCount, &ParentHeightStack](int Height) 
+    {
+        assert(ParentHeightStackCount < IMQ2_STACK_MAX);
+        ParentHeightStack[ParentHeightStackCount++] = Height;
+    };
+    auto PeekParentHeightStack = [&ParentHeightStackCount, &ParentHeightStack]()
+    {
+        assert(ParentHeightStackCount > 0);
+        return ParentHeightStack[ParentHeightStackCount - 1];
+    };
+
     if (!s[0])
         return;
 
@@ -812,12 +876,40 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
     while (s)
     {
         token = COM_Parse (&s);
+
+        if (!strcmp(token, "par"))
+        {
+            IsParent = true;
+        }
+        if (!strcmp(token, "rel"))
+        {
+            IsRelative = true;
+        }
+
+        if (!strcmp(token, ";"))
+        {
+            IsParent = false;
+            IsRelative = false;
+        }
+
         if (!strcmp(token, "xl"))
         {
             token = COM_Parse (&s);
             if (!skip_depth)
             {
-                x = ((hud_vrect.x + atoi(token)) * scale) + hud_safe.x;
+                if (IsRelative)
+                {
+                    x = (PeekParentXStack() + atoi(token));
+                }
+                else
+                {
+                    x = ((hud_vrect.x + atoi(token)) * scale) + hud_safe.x;
+                }
+
+                if (IsParent)
+                {
+                    PushParentX(x);
+                }
             }
             continue;
         }
@@ -825,21 +917,64 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
         {
             token = COM_Parse (&s);
             if (!skip_depth)
-                x = ((hud_vrect.x + hud_vrect.width + atoi(token)) * scale) - hud_safe.x;
+            {
+                if (IsRelative)
+                {
+                    x = (PeekParentXStack() + PeekParentWidthStack() + atoi(token));
+                }
+                else
+                {
+                    x = ((hud_vrect.x + hud_vrect.width + atoi(token)) * scale) - hud_safe.x;
+                }
+
+                if (IsParent)
+                {
+                    PushParentX(x);
+                }
+            }
             continue;
         }
         if (!strcmp(token, "xv"))
         {
             token = COM_Parse (&s);
             if (!skip_depth)
-                x = (hud_vrect.x + hud_vrect.width/2 + (atoi(token) - hx)) * scale;
+            {
+                if (IsRelative)
+                {   
+                    // TODO(Oskar): I do not know how this makes sense in relative situation..
+                    x = (PeekParentXStack() + atoi(token));
+                }
+                else
+                {
+                    x = (hud_vrect.x + hud_vrect.width/2 + (atoi(token) - hx)) * scale;
+                }
+
+                if (IsParent)
+                {
+                    PushParentX(x);
+                }
+            }
             continue;
         }
         if (!strcmp(token, "xc"))
         {
             token = COM_Parse (&s);
             if (!skip_depth)
-                x = ((hud_vrect.x + hud_vrect.width / 2) + atoi(token)) * scale;
+            {
+                if (IsRelative)
+                {
+                    x = ((PeekParentXStack() + PeekParentWidthStack() / 2) + atoi(token));
+                }
+                else
+                {
+                    x = ((hud_vrect.x + hud_vrect.width / 2) + atoi(token)) * scale;
+                }
+
+                if (IsParent)
+                {
+                    PushParentX(x);
+                }
+            }
             continue;
         }
 
@@ -848,7 +983,18 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             token = COM_Parse (&s);
             if (!skip_depth)
             {
-                y = ((hud_vrect.y + atoi(token)) * scale) + hud_safe.y;
+                if (IsRelative)
+                {
+                    y = (PeekParentYStack() + atoi(token));
+                }
+                else
+                {
+                    y = ((hud_vrect.y + atoi(token)) * scale) + hud_safe.y;
+                }
+                if (IsParent)
+                {
+                    PushParentY(y);
+                }
             }
             continue;
         }
@@ -856,26 +1002,84 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
         {
             token = COM_Parse (&s);
             if (!skip_depth)
-                y = ((hud_vrect.y + hud_vrect.height + atoi(token)) * scale) - hud_safe.y;
+            {
+                if (IsRelative)
+                {
+                    y = (PeekParentYStack() + PeekParentHeightStack() + atoi(token));
+                }
+                else
+                {
+                    y = ((hud_vrect.y + hud_vrect.height + atoi(token)) * scale) - hud_safe.y;
+                }
+                
+                if (IsParent)
+                {
+                    PushParentY(y);
+                }
+            }
             continue;
         }
         if (!strcmp(token, "yv"))
         {
             token = COM_Parse (&s);
             if (!skip_depth)
-                y = (hud_vrect.y + hud_vrect.height/2 + (atoi(token) - hy)) * scale;
+            {
+                if (IsRelative)
+                {
+                    // TODO(Oskar): I do not know how this makes sense in relative situation..
+                    y = (PeekParentYStack() + atoi(token));
+                }
+                else
+                {
+                    y = (hud_vrect.y + hud_vrect.height/2 + (atoi(token) - hy)) * scale;
+                }
+
+                if (IsParent)
+                {
+                    PushParentY(y);
+                }
+            }
+            continue;
+        }
+        if (!strcmp(token, "yc"))
+        {
+            token = COM_Parse (&s);
+            if (!skip_depth)
+            {
+                if (IsRelative)
+                {
+                    y = ((PeekParentYStack() + PeekParentHeightStack() / 2) + atoi(token));
+                } 
+                else
+                {
+                    y = ((hud_vrect.y + hud_vrect.height / 2) + atoi(token)) * scale;
+                }
+
+                if (IsParent)
+                {
+                    PushParentY(y);
+                }
+            }
             continue;
         }
         if (!strcmp(token, "w"))
         {
             token = COM_Parse(&s);
             w = atoi(token);
+            if (IsParent)
+            {
+                PushParentWidth(w);
+            }
             continue;
         }
         if (!strcmp(token, "h"))
         {
             token = COM_Parse(&s);
             h = atoi(token);
+            if (IsParent)
+            {
+                PushParentHeight(h);
+            }
             continue;
         }
 
