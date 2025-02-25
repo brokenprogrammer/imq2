@@ -316,6 +316,61 @@ std::string IMQ2BuildUIString(imq2 *UI)
                 XToken = "xc";
                 X -= W / 2;
             } break;
+
+            case imq2_horizontal_align::RelativeLeft:
+            {
+                XToken = "rxl";
+            } break;
+
+            case imq2_horizontal_align::RelativeRight:
+            {
+                XToken = "rxr";
+                X = -Element->Rectangle.MinX - W;
+            } break;
+
+            case imq2_horizontal_align::RelativeCenter:
+            {
+                XToken = "rxc";
+                X -= W / 2;
+            } break;
+        }
+
+        std::string YToken;
+        switch (Element->VerticalAlign)
+        {
+            case imq2_vertical_align::Top:
+            {
+                YToken = "yt";
+            } break;
+
+            case imq2_vertical_align::Bottom:
+            {
+                YToken = "yb";
+                Y = -Element->Rectangle.MinY - H;
+            } break;
+            
+            case imq2_vertical_align::Center:
+            {
+                YToken = "yc";
+                Y -= H / 2;
+            } break;
+
+            case imq2_vertical_align::RelativeTop:
+            {
+                YToken = "ryt";
+            } break;
+
+            case imq2_vertical_align::RelativeBottom:
+            {
+                YToken = "ryb";
+                Y = -Element->Rectangle.MinY - H;
+            } break;
+            
+            case imq2_vertical_align::RelativeCenter:
+            {
+                YToken = "ryc";
+                Y -= H / 2;
+            } break;
         }
 
         float CenterX = X + (W / 2);
@@ -328,33 +383,28 @@ std::string IMQ2BuildUIString(imq2 *UI)
             UIString += "par ";
         }
 
-        if (Element->Parent)
-        {
-            UIString += "rel ";
-        }
-
         if (UI->ActiveElement == Element)
         {
             // TODO(Oskar): Make this color base of something else or allow user to specify it.
             imq2_color HighLightColor = { 57, 255, 20, 255 };
-            UIString += fmt::format("{} {} yt {} w {} h {} col {} {} {} {} ", XToken, X-1, Y-1, W+2, H+2, HighLightColor.R, HighLightColor.G, HighLightColor.B, HighLightColor.A);
+            UIString += fmt::format("{} {} {} {} w {} h {} col {} {} {} {} ", XToken, X-1, YToken, Y-1, W+2, H+2, HighLightColor.R, HighLightColor.G, HighLightColor.B, HighLightColor.A);
         }
 
         if (Element->Flags & Element_Flag_DrawBackgroundPic)
         {
-            UIString += fmt::format("{} {} yt {} w {} h {} picb {} ", XToken, X, Y, W, H, Element->PicName);
+            UIString += fmt::format("{} {} {} {} w {} h {} picb {} ", XToken, X, YToken, Y, W, H, Element->PicName);
         }
         if (Element->Flags & Element_Flag_DrawBackground)
         {
-            UIString += fmt::format("{} {} yt {} w {} h {} col {} {} {} {} ", XToken, X, Y, W, H, Color.R, Color.G, Color.B, Color.A);
+            UIString += fmt::format("{} {} {} {} w {} h {} col {} {} {} {} ", XToken, X, YToken, Y, W, H, Color.R, Color.G, Color.B, Color.A);
         }
         if (Element->Flags & Element_Flag_DrawText)
         {
-            UIString += fmt::format("{} {} yt {} stringc \"{}\" ", XToken, CenterX, CenterY, Element->String);
+            UIString += fmt::format("{} {} {} {} stringc \"{}\" ", XToken, CenterX, YToken, CenterY, Element->String);
         }
         if (Element->Flags & Element_Flag_DrawPic)
         {
-            UIString += fmt::format("{} {} yt {} picnc {} ", XToken, CenterX, CenterY, Element->PicName);
+            UIString += fmt::format("{} {} {} {} picnc {} ", XToken, CenterX, YToken, CenterY, Element->PicName);
         }
 
         // NOTE(Oskar): Used to mark end of UI element, this resets parent and relative flag.
@@ -433,7 +483,7 @@ void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, f
     imq2_rect ProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Left), ProgressWidth);
     IMQ2PushParent(UI, Parent);
     {
-        IMQ2PushHorizontalAlignment(UI, imq2_horizontal_align::Left);
+        IMQ2PushHorizontalAlignment(UI, imq2_horizontal_align::RelativeLeft);
         {
             IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
             {
@@ -475,7 +525,7 @@ void IMQ2Speedometer(imq2 *UI, imq2_rect_slice Layout, float Value, float Progre
     imq2_rect ProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Left), FirstProgressWidth);
     IMQ2PushParent(UI, Parent);
     {
-        IMQ2PushHorizontalAlignment(UI, imq2_horizontal_align::Left);
+        IMQ2PushHorizontalAlignment(UI, imq2_horizontal_align::RelativeLeft);
         {
 
             IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});

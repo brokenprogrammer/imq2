@@ -26,16 +26,22 @@ struct imq2_rect_slice
 
 enum class imq2_horizontal_align
 {
-    Left,    // xl: MinX is absolute left edge
-    Right,   // xr: MinX is offset from right edge
-    Center   // xc: MinX is offset from center
+    Left,           // xl:  MinX is absolute left edge
+    Right,          // xr:  MinX is offset from right edge
+    Center,         // xc:  MinX is offset from center
+    RelativeLeft,   // rxl: MinX is relative to parent left edge
+    RelativeRight,  // rxr: MinX is relative to parent right edge
+    RelativeCenter, // rxc: MinX is relative to parent center
 };
 
 enum class imq2_vertical_align
 {
-    Top,    // yt: MinX is absolute left edge
-    Bottom, // yb: MinX is offset from right edge
-    Center  // xc: MinX is offset from center
+    Top,            // yt:  MinY is absolute top edge
+    Bottom,         // yb:  MinY is offset from bottom edge
+    Center,         // xc:  MinY is offset from center
+    RelativeTop,    // ryt: MinY is relative to parent top edge
+    RelativeBottom, // ryb: MinY is relative to parent bottom edge
+    RelativeCenter, // ryc: MinY is relative to parent center
 };
 
 struct imq2_color
