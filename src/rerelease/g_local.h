@@ -2839,6 +2839,8 @@ struct gclient_t
 	bool showhelp;
 	bool showCustomUI;
 	bool ShowIMQ2LayoutExample;
+	bool ShowIMQ2LayoutExample2;
+	bool ShowIMQ2LayoutExample3;
 
 	button_t buttons;
 	button_t oldbuttons;

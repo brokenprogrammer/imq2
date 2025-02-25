@@ -905,7 +905,7 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             token = COM_Parse (&s);
             if (!skip_depth)
             {
-                x = (PeekParentXStack() + atoi(token));
+                x = (PeekParentXStack() + (atoi(token) * scale));
                 
                 if (IsParent)
                 {
@@ -934,7 +934,7 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             token = COM_Parse (&s);
             if (!skip_depth)
             {
-                x = (PeekParentXStack() + PeekParentWidthStack() + atoi(token));
+                x = (PeekParentXStack() + PeekParentWidthStack() + (atoi(token) * scale));
              
                 if (IsParent)
                 {
@@ -979,7 +979,7 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             token = COM_Parse (&s);
             if (!skip_depth)
             {
-                x = ((PeekParentXStack() + PeekParentWidthStack() / 2) + atoi(token));
+                x = ((PeekParentXStack() + PeekParentWidthStack() / 2) + (atoi(token) * scale));
                 
                 if (IsParent)
                 {
@@ -1008,7 +1008,7 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             token = COM_Parse (&s);
             if (!skip_depth)
             {
-                y = (PeekParentYStack() + atoi(token));
+                y = (PeekParentYStack() + (atoi(token) * scale));
                 
                 if (IsParent)
                 {
@@ -1037,7 +1037,7 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             token = COM_Parse (&s);
             if (!skip_depth)
             {
-                y = (PeekParentYStack() + PeekParentHeightStack() + atoi(token));
+                y = (PeekParentYStack() + PeekParentHeightStack() + (atoi(token) * scale));
 
                 if (IsParent)
                 {
@@ -1081,7 +1081,7 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             token = COM_Parse (&s);
             if (!skip_depth)
             {
-                y = ((PeekParentYStack() + PeekParentHeightStack() / 2) + atoi(token));
+                y = ((PeekParentYStack() + PeekParentHeightStack() / 2) + (atoi(token) * scale));
 
                 if (IsParent)
                 {
@@ -1097,7 +1097,7 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             w = atoi(token);
             if (IsParent)
             {
-                PushParentWidth(w);
+                PushParentWidth(w * scale);
             }
             continue;
         }
@@ -1107,7 +1107,7 @@ static void CG_ExecuteLayoutString (const char *s, vrect_t hud_vrect, vrect_t hu
             h = atoi(token);
             if (IsParent)
             {
-                PushParentHeight(h);
+                PushParentHeight(h * scale);
             }
             continue;
         }

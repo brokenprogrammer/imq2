@@ -1670,7 +1670,6 @@ void Cmd_ShowIMQ2LayoutExample_f(edict_t *ent)
     ent->movetype = MOVETYPE_NOCLIP;
 
 	imq2_rect Layout = { 0, 0, 360, 180 };
-	// imq2_rect Layout2 = { 200, 200, 50, 50 };
 	IMQ2Begin(&cl->UI, Layout);
 	
 	// NOTE(Oskar): Left aligned menu
@@ -1781,12 +1780,298 @@ void Cmd_ShowIMQ2LayoutExample_f(edict_t *ent)
 		IMQ2PopHorizontalAlignment(&cl->UI);
 		IMQ2PopBackgroundColor(&cl->UI);
 	}
+    IMQ2End(&cl->UI);
 
-	// IMQ2UpgradeSelectionButton(&cl->UI, PrepareSlice(&Layout, Slice_Side_Left), 100, "Upgrade", "w_blaster", "10x Damage");
-	// CutLeft(&Layout, 10);
-	// IMQ2UpgradeSelectionButton(&cl->UI, PrepareSlice(&Layout, Slice_Side_Left), 100, "Boost", "i_health", "10 Bonus\nMax HP");
-	// CutLeft(&Layout, 10);
-	// IMQ2UpgradeSelectionButton(&cl->UI, PrepareSlice(&Layout, Slice_Side_Left), 100, "Upgrade", "w_bfg", "2x Damage");
+	std::string UIString = IMQ2BuildUIString(&cl->UI);
+	gi.WriteByte(svc_layout);
+	gi.WriteString(UIString.c_str());
+	gi.unicast(ent, true);
+}
+
+/*
+=================
+Cmd_ShowIMQ2LayoutExample3_f
+=================
+*/
+void Cmd_ShowIMQ2LayoutExample3_f(edict_t *ent)
+{
+	int		   i;
+	gclient_t* cl;
+
+	cl = ent->client;
+
+	cl->showscores = false;
+	cl->showinventory = false;
+	cl->showhelp = false;
+	cl->showCustomUI = false;
+	cl->ShowIMQ2LayoutExample = false;
+	cl->ShowIMQ2LayoutExample2 = false;
+
+	globals.server_flags |= SERVER_FLAG_SLOW_TIME;
+
+	if (cl->ShowIMQ2LayoutExample3)
+	{
+		cl->ShowIMQ2LayoutExample3 = false;
+        ent->movetype = MOVETYPE_WALK;
+		globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
+		return;
+	}
+
+	cl->ShowIMQ2LayoutExample3 = true;
+    ent->movetype = MOVETYPE_NOCLIP;
+
+	imq2_rect Layout = { 0, 0, 250, 250 };
+	IMQ2Begin(&cl->UI, Layout);
+	{
+		imq2_ui_element *Parent = NULL;
+
+		IMQ2PushBackgroundColor(&cl->UI, { 0, 0, 0, 255 });
+		IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::Center);
+		IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::Center);
+		{
+			Parent = IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout);
+		}
+		IMQ2PopVerticalAlignment(&cl->UI);
+		IMQ2PopHorizontalAlignment(&cl->UI);
+		IMQ2PopBackgroundColor(&cl->UI);
+
+		float Padding = (250 - (50 * 3)) / 4;
+
+		imq2_rect TopRow = IMQ2SliceTop(&Layout, 50);
+		IMQ2SliceTop(&Layout, 50);		
+		imq2_rect TopLeft = IMQ2SliceLeft(&TopRow, 50);
+		IMQ2SliceLeft(&TopRow, 50);
+		imq2_rect TopCenter = IMQ2SliceLeft(&TopRow, 50);
+		imq2_rect TopRight = IMQ2SliceRight(&TopRow, 50);
+
+
+		imq2_rect MiddleRow = IMQ2SliceTop(&Layout, 50);
+		imq2_rect MiddleLeft = IMQ2SliceLeft(&MiddleRow, 50);
+		IMQ2SliceLeft(&MiddleRow, 50);
+		imq2_rect MiddleCenter = IMQ2SliceLeft(&MiddleRow, 50);
+		imq2_rect MiddleRight = IMQ2SliceRight(&MiddleRow, 50);
+
+		imq2_rect BottomRow = IMQ2SliceBottom(&Layout, 50);
+		imq2_rect BottomLeft = IMQ2SliceLeft(&BottomRow, 50);
+		IMQ2SliceLeft(&BottomRow, 50);
+		imq2_rect BottomCenter = IMQ2SliceLeft(&BottomRow, 50);
+		imq2_rect BottomRight = IMQ2SliceRight(&BottomRow, 50);
+
+		IMQ2PushParent(&cl->UI, Parent);
+		{			
+			IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::RelativeTop);
+			IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeLeft);
+			{
+				// NOTE(Oskar): Top Row
+				{
+					IMQ2PushBackgroundColor(&cl->UI, { 255, 0, 0, 255 });
+					{
+						IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, TopLeft);
+					}
+					IMQ2PopBackgroundColor(&cl->UI);
+					
+					IMQ2PushBackgroundColor(&cl->UI, { 0, 255, 0, 255 });
+					{
+						IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, TopCenter);
+					}
+					IMQ2PopBackgroundColor(&cl->UI);
+	
+					IMQ2PushBackgroundColor(&cl->UI, { 0, 0, 255, 255 });
+					{
+						IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, TopRight);
+					}
+					IMQ2PopBackgroundColor(&cl->UI);
+				}
+
+				// NOTE(Oskar): Middle Row
+				{
+					IMQ2PushBackgroundColor(&cl->UI, { 255, 255, 0, 255 });
+					{
+						IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, MiddleLeft);
+					}
+					IMQ2PopBackgroundColor(&cl->UI);
+					
+					IMQ2PushBackgroundColor(&cl->UI, { 255, 0, 255, 255 } );
+					{
+						IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, MiddleCenter);
+					}
+					IMQ2PopBackgroundColor(&cl->UI);
+	
+					IMQ2PushBackgroundColor(&cl->UI, { 0, 255, 255, 255 });
+					{
+						IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, MiddleRight);
+					}
+					IMQ2PopBackgroundColor(&cl->UI);
+				}
+
+				// NOTE(Oskar): Bottom Row
+				{
+					IMQ2PushBackgroundColor(&cl->UI, { 128, 0, 128, 255 });
+					{
+						IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, BottomLeft);
+					}
+					IMQ2PopBackgroundColor(&cl->UI);
+					
+					IMQ2PushBackgroundColor(&cl->UI,  { 255, 165, 0, 255 });
+					{
+						IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, BottomCenter);
+					}
+					IMQ2PopBackgroundColor(&cl->UI);
+	
+					IMQ2PushBackgroundColor(&cl->UI, { 0, 128, 128, 255 });
+					{
+						IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, BottomRight);
+					}
+					IMQ2PopBackgroundColor(&cl->UI);
+				}
+			}
+			IMQ2PopHorizontalAlignment(&cl->UI);
+			IMQ2PopVerticalAlignment(&cl->UI);
+		}
+		IMQ2PopParent(&cl->UI);
+	}
+    IMQ2End(&cl->UI);
+
+	std::string UIString = IMQ2BuildUIString(&cl->UI);
+	gi.WriteByte(svc_layout);
+	gi.WriteString(UIString.c_str());
+	gi.unicast(ent, true);
+}
+
+/*
+=================
+Cmd_ShowIMQ2LayoutExample2_f
+=================
+*/
+void Cmd_ShowIMQ2LayoutExample2_f(edict_t *ent)
+{
+	int		   i;
+	gclient_t* cl;
+
+	cl = ent->client;
+
+	cl->showscores = false;
+	cl->showinventory = false;
+	cl->showhelp = false;
+	cl->showCustomUI = false;
+	cl->ShowIMQ2LayoutExample = false;
+
+	globals.server_flags |= SERVER_FLAG_SLOW_TIME;
+
+	if (cl->ShowIMQ2LayoutExample2)
+	{
+		cl->ShowIMQ2LayoutExample2 = false;
+        ent->movetype = MOVETYPE_WALK;
+		globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
+		return;
+	}
+
+	cl->ShowIMQ2LayoutExample2 = true;
+    ent->movetype = MOVETYPE_NOCLIP;
+
+	imq2_rect Layout = { 0, 0, 250, 250 };
+	IMQ2Begin(&cl->UI, Layout);
+	{
+		imq2_ui_element *Parent = NULL;
+
+		IMQ2PushBackgroundColor(&cl->UI, { 0, 0, 0, 255 });
+		IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::Center);
+		IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::Center);
+		{
+			Parent = IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout);
+		}
+		IMQ2PopVerticalAlignment(&cl->UI);
+		IMQ2PopHorizontalAlignment(&cl->UI);
+		IMQ2PopBackgroundColor(&cl->UI);
+
+		IMQ2PushParent(&cl->UI, Parent);
+		{			
+			IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::RelativeTop);
+			{
+				IMQ2PushBackgroundColor(&cl->UI, { 255, 0, 0, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeLeft);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+				
+				IMQ2PushBackgroundColor(&cl->UI, { 0, 255, 0, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeCenter);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+
+				IMQ2PushBackgroundColor(&cl->UI, { 0, 0, 255, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeRight);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+			}
+			IMQ2PopVerticalAlignment(&cl->UI);
+
+			IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::RelativeCenter);
+			{
+				IMQ2PushBackgroundColor(&cl->UI, { 255, 255, 0, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeLeft);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+				
+				IMQ2PushBackgroundColor(&cl->UI, { 255, 0, 255, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeCenter);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+
+				IMQ2PushBackgroundColor(&cl->UI, { 0, 255, 255, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeRight);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+			}
+			IMQ2PopVerticalAlignment(&cl->UI);
+
+			IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::RelativeBottom);
+			{
+				IMQ2PushBackgroundColor(&cl->UI, { 128, 0, 128, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeLeft);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+				
+				IMQ2PushBackgroundColor(&cl->UI, { 255, 165, 0, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeCenter);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+
+				IMQ2PushBackgroundColor(&cl->UI, { 0, 128, 128, 255 } );
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeRight);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+			}
+			IMQ2PopVerticalAlignment(&cl->UI);
+		}
+		IMQ2PopParent(&cl->UI);
+	}
     IMQ2End(&cl->UI);
 
 	std::string UIString = IMQ2BuildUIString(&cl->UI);
@@ -1956,6 +2241,14 @@ void ClientCommand(edict_t *ent)
 	else if (Q_strcasecmp(cmd, "imq2example1") == 0)
 	{
 		Cmd_ShowIMQ2LayoutExample_f(ent);
+	}
+	else if (Q_strcasecmp(cmd, "imq2example2") == 0)
+	{
+		Cmd_ShowIMQ2LayoutExample2_f(ent);
+	}
+	else if (Q_strcasecmp(cmd, "imq2example3") == 0)
+	{
+		Cmd_ShowIMQ2LayoutExample3_f(ent);
 	}
 #ifndef KEX_Q2_GAME
 	else // anything that doesn't match a command will be a chat

@@ -376,7 +376,7 @@ std::string IMQ2BuildUIString(imq2 *UI)
         float CenterX = X + (W / 2);
         float CenterX2 = X + (W / 4);
         float CenterY = Y + (H / 4);
-        imq2_color Color = Element->BackgroundColor; // TODO(Oskar): Serialize propperly
+        imq2_color Color = Element->BackgroundColor;
 
         if (Element->IsParent)
         {

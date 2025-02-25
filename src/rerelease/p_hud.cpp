@@ -957,7 +957,8 @@ void G_SetStats(edict_t *ent)
 	else
 	{
 		if (ent->client->showscores || ent->client->showhelp || ent->client->showeou || 
-			ent->client->showCustomUI || ent->client->ShowIMQ2LayoutExample)
+			ent->client->showCustomUI || ent->client->ShowIMQ2LayoutExample ||
+			ent->client->ShowIMQ2LayoutExample2 || ent->client->ShowIMQ2LayoutExample3)
 			ent->client->ps.stats[STAT_LAYOUTS] |= LAYOUTS_LAYOUT;
 		if (ent->client->showinventory && ent->client->pers.health > 0)
 			ent->client->ps.stats[STAT_LAYOUTS] |= LAYOUTS_INVENTORY;
