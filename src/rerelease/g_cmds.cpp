@@ -1610,6 +1610,8 @@ void Cmd_CustomUI_f(edict_t* ent)
 	cl->showinventory = false;
 	cl->showhelp = false;
 	cl->ShowIMQ2LayoutExample = false;
+	cl->ShowIMQ2LayoutExample2 = false;
+	cl->ShowIMQ2LayoutExample3 = false;
 
 	// globals.server_flags |= SERVER_FLAG_SLOW_TIME;
 
@@ -1624,7 +1626,7 @@ void Cmd_CustomUI_f(edict_t* ent)
 	cl->showCustomUI = true;
     ent->movetype = MOVETYPE_NOCLIP;
 
-	imq2_rect Layout = { 0, 0, 360, 180 };
+	imq2_rect Layout = { 0, 0, 100, 50 };
 	IMQ2Begin(&cl->UI, Layout);
 	IMQ2UpgradeSelectionButton(&cl->UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 100, "Upgrade", "w_blaster", "10x Damage");
 	IMQ2SliceLeft(&Layout, 10);
@@ -1655,6 +1657,8 @@ void Cmd_ShowIMQ2LayoutExample_f(edict_t *ent)
 	cl->showinventory = false;
 	cl->showhelp = false;
 	cl->showCustomUI = false;
+	cl->ShowIMQ2LayoutExample2 = false;
+	cl->ShowIMQ2LayoutExample3 = false;
 
 	globals.server_flags |= SERVER_FLAG_SLOW_TIME;
 
@@ -1779,6 +1783,149 @@ void Cmd_ShowIMQ2LayoutExample_f(edict_t *ent)
 		}
 		IMQ2PopHorizontalAlignment(&cl->UI);
 		IMQ2PopBackgroundColor(&cl->UI);
+	}
+    IMQ2End(&cl->UI);
+
+	std::string UIString = IMQ2BuildUIString(&cl->UI);
+	gi.WriteByte(svc_layout);
+	gi.WriteString(UIString.c_str());
+	gi.unicast(ent, true);
+}
+
+/*
+=================
+Cmd_ShowIMQ2LayoutExample2_f
+=================
+*/
+void Cmd_ShowIMQ2LayoutExample2_f(edict_t *ent)
+{
+	int		   i;
+	gclient_t* cl;
+
+	cl = ent->client;
+
+	cl->showscores = false;
+	cl->showinventory = false;
+	cl->showhelp = false;
+	cl->showCustomUI = false;
+	cl->ShowIMQ2LayoutExample = false;
+	cl->ShowIMQ2LayoutExample3 = false;
+
+	globals.server_flags |= SERVER_FLAG_SLOW_TIME;
+
+	if (cl->ShowIMQ2LayoutExample2)
+	{
+		cl->ShowIMQ2LayoutExample2 = false;
+        ent->movetype = MOVETYPE_WALK;
+		globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
+		return;
+	}
+
+	cl->ShowIMQ2LayoutExample2 = true;
+    ent->movetype = MOVETYPE_NOCLIP;
+
+	imq2_rect Layout = { 0, 0, 250, 250 };
+	IMQ2Begin(&cl->UI, Layout);
+	{
+		imq2_ui_element *Parent = NULL;
+
+		IMQ2PushBackgroundColor(&cl->UI, { 0, 0, 0, 255 });
+		IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::Center);
+		IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::Center);
+		{
+			Parent = IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout);
+		}
+		IMQ2PopVerticalAlignment(&cl->UI);
+		IMQ2PopHorizontalAlignment(&cl->UI);
+		IMQ2PopBackgroundColor(&cl->UI);
+
+		IMQ2PushParent(&cl->UI, Parent);
+		{			
+			IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::RelativeTop);
+			{
+				IMQ2PushBackgroundColor(&cl->UI, { 255, 0, 0, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeLeft);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+				
+				IMQ2PushBackgroundColor(&cl->UI, { 0, 255, 0, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeCenter);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+
+				IMQ2PushBackgroundColor(&cl->UI, { 0, 0, 255, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeRight);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+			}
+			IMQ2PopVerticalAlignment(&cl->UI);
+
+			IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::RelativeCenter);
+			{
+				IMQ2PushBackgroundColor(&cl->UI, { 255, 255, 0, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeLeft);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+				
+				IMQ2PushBackgroundColor(&cl->UI, { 255, 0, 255, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeCenter);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+
+				IMQ2PushBackgroundColor(&cl->UI, { 0, 255, 255, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeRight);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+			}
+			IMQ2PopVerticalAlignment(&cl->UI);
+
+			IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::RelativeBottom);
+			{
+				IMQ2PushBackgroundColor(&cl->UI, { 128, 0, 128, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeLeft);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+				
+				IMQ2PushBackgroundColor(&cl->UI, { 255, 165, 0, 255 });
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeCenter);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+
+				IMQ2PushBackgroundColor(&cl->UI, { 0, 128, 128, 255 } );
+				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeRight);
+				{
+					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
+				}
+				IMQ2PopHorizontalAlignment(&cl->UI);
+				IMQ2PopBackgroundColor(&cl->UI);
+			}
+			IMQ2PopVerticalAlignment(&cl->UI);
+		}
+		IMQ2PopParent(&cl->UI);
 	}
     IMQ2End(&cl->UI);
 
@@ -1940,148 +2087,6 @@ void Cmd_ShowIMQ2LayoutExample3_f(edict_t *ent)
 
 /*
 =================
-Cmd_ShowIMQ2LayoutExample2_f
-=================
-*/
-void Cmd_ShowIMQ2LayoutExample2_f(edict_t *ent)
-{
-	int		   i;
-	gclient_t* cl;
-
-	cl = ent->client;
-
-	cl->showscores = false;
-	cl->showinventory = false;
-	cl->showhelp = false;
-	cl->showCustomUI = false;
-	cl->ShowIMQ2LayoutExample = false;
-
-	globals.server_flags |= SERVER_FLAG_SLOW_TIME;
-
-	if (cl->ShowIMQ2LayoutExample2)
-	{
-		cl->ShowIMQ2LayoutExample2 = false;
-        ent->movetype = MOVETYPE_WALK;
-		globals.server_flags &= ~SERVER_FLAG_SLOW_TIME;
-		return;
-	}
-
-	cl->ShowIMQ2LayoutExample2 = true;
-    ent->movetype = MOVETYPE_NOCLIP;
-
-	imq2_rect Layout = { 0, 0, 250, 250 };
-	IMQ2Begin(&cl->UI, Layout);
-	{
-		imq2_ui_element *Parent = NULL;
-
-		IMQ2PushBackgroundColor(&cl->UI, { 0, 0, 0, 255 });
-		IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::Center);
-		IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::Center);
-		{
-			Parent = IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, Layout);
-		}
-		IMQ2PopVerticalAlignment(&cl->UI);
-		IMQ2PopHorizontalAlignment(&cl->UI);
-		IMQ2PopBackgroundColor(&cl->UI);
-
-		IMQ2PushParent(&cl->UI, Parent);
-		{			
-			IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::RelativeTop);
-			{
-				IMQ2PushBackgroundColor(&cl->UI, { 255, 0, 0, 255 });
-				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeLeft);
-				{
-					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
-				}
-				IMQ2PopHorizontalAlignment(&cl->UI);
-				IMQ2PopBackgroundColor(&cl->UI);
-				
-				IMQ2PushBackgroundColor(&cl->UI, { 0, 255, 0, 255 });
-				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeCenter);
-				{
-					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
-				}
-				IMQ2PopHorizontalAlignment(&cl->UI);
-				IMQ2PopBackgroundColor(&cl->UI);
-
-				IMQ2PushBackgroundColor(&cl->UI, { 0, 0, 255, 255 });
-				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeRight);
-				{
-					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
-				}
-				IMQ2PopHorizontalAlignment(&cl->UI);
-				IMQ2PopBackgroundColor(&cl->UI);
-			}
-			IMQ2PopVerticalAlignment(&cl->UI);
-
-			IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::RelativeCenter);
-			{
-				IMQ2PushBackgroundColor(&cl->UI, { 255, 255, 0, 255 });
-				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeLeft);
-				{
-					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
-				}
-				IMQ2PopHorizontalAlignment(&cl->UI);
-				IMQ2PopBackgroundColor(&cl->UI);
-				
-				IMQ2PushBackgroundColor(&cl->UI, { 255, 0, 255, 255 });
-				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeCenter);
-				{
-					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
-				}
-				IMQ2PopHorizontalAlignment(&cl->UI);
-				IMQ2PopBackgroundColor(&cl->UI);
-
-				IMQ2PushBackgroundColor(&cl->UI, { 0, 255, 255, 255 });
-				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeRight);
-				{
-					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
-				}
-				IMQ2PopHorizontalAlignment(&cl->UI);
-				IMQ2PopBackgroundColor(&cl->UI);
-			}
-			IMQ2PopVerticalAlignment(&cl->UI);
-
-			IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::RelativeBottom);
-			{
-				IMQ2PushBackgroundColor(&cl->UI, { 128, 0, 128, 255 });
-				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeLeft);
-				{
-					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
-				}
-				IMQ2PopHorizontalAlignment(&cl->UI);
-				IMQ2PopBackgroundColor(&cl->UI);
-				
-				IMQ2PushBackgroundColor(&cl->UI, { 255, 165, 0, 255 });
-				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeCenter);
-				{
-					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
-				}
-				IMQ2PopHorizontalAlignment(&cl->UI);
-				IMQ2PopBackgroundColor(&cl->UI);
-
-				IMQ2PushBackgroundColor(&cl->UI, { 0, 128, 128, 255 } );
-				IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::RelativeRight);
-				{
-					IMQ2ElementCreate(&cl->UI, Element_Flag_DrawBackground, NULL, NULL, {0, 0, 50, 50});
-				}
-				IMQ2PopHorizontalAlignment(&cl->UI);
-				IMQ2PopBackgroundColor(&cl->UI);
-			}
-			IMQ2PopVerticalAlignment(&cl->UI);
-		}
-		IMQ2PopParent(&cl->UI);
-	}
-    IMQ2End(&cl->UI);
-
-	std::string UIString = IMQ2BuildUIString(&cl->UI);
-	gi.WriteByte(svc_layout);
-	gi.WriteString(UIString.c_str());
-	gi.unicast(ent, true);
-}
-
-/*
-=================
 ClientCommand
 =================
 */
@@ -2093,8 +2098,6 @@ void ClientCommand(edict_t *ent)
 		return; // not fully in game yet
 
 	cmd = gi.argv(0);
-	gi.LocClient_Print(ent, PRINT_HIGH, "Client command: \"{}\"\n", cmd);
-
 	if (Q_strcasecmp(cmd, "players") == 0)
 	{
 		Cmd_Players_f(ent);
