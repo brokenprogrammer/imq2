@@ -2072,7 +2072,7 @@ void CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect_t hud_vrect
         IMQ2Begin(&UI, Layout);
         IMQ2PushHorizontalAlignment(&UI, imq2_horizontal_align::Center);
         {
-            IMQ2Speedometer(&UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 150, Speed, SpeedString.c_str(), "inventory_trans");
+            IMQ2Speedometer(&UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 150, Speed, SpeedString.c_str(), "speedo_background");
         }
         IMQ2PopHorizontalAlignment(&UI);
         IMQ2End(&UI);
