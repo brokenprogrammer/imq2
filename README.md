@@ -4,13 +4,13 @@ imq2 is a wrapper library for the built-in layout language in Quake 2, designed 
 
 ## Usage
 
-The library files are mainly [imq2.h](rerelease/imq2.h) and [imq2.cpp](rerelease/imq2.h) that contains the library code. The library has introduced some new custom tokens to the Quake 2 layout language, in order for them to be properly parsed the changes this repository has inside of [cg_screen.cpp](rerelease/cg_screen.cpp) also need to be included in your project (only the modified version of `CG_ExecuteLayoutString`).
+The library files are mainly [imq2.h](src/rerelease/imq2.h) and [imq2.cpp](src/rerelease/imq2.h) that contains the library code. The library has introduced some new custom tokens to the Quake 2 layout language, in order for them to be properly parsed the changes this repository has inside of [cg_screen.cpp](src/rerelease/cg_screen.cpp) also need to be included in your project (only the modified version of `CG_ExecuteLayoutString`).
 
 This repository also contains changes within some other files in order to provide layout examples, these examples are inteded for users to view while reading the source code in order to get a better idea of how to build layouts.
 
 ### Available examples
 
-The available examples are located within [g_cmds.cpp](rerelease/g_cmds.cpp), they are registered as custom commands which you can access by typing the command within the in-game console. For them to be viewed properly you need to be inside a level. While testing I have just booted up the first level of the campaign.
+The available examples are located within [g_cmds.cpp](src/rerelease/g_cmds.cpp), they are registered as custom commands which you can access by typing the command within the in-game console. For them to be viewed properly you need to be inside a level. While testing I have just booted up the first level of the campaign.
 
 The commands along with what they display are as follows:
 
