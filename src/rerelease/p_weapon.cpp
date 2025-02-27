@@ -1325,8 +1325,6 @@ BLASTER / HYPERBLASTER
 
 void Blaster_Fire(edict_t *ent, const vec3_t &g_offset, int damage, bool hyper, effects_t effect)
 {
-	gi.LocCenter_Print(ent, "in Blaster_Fire!!\n");
-
 	if (is_quad)
 		damage *= damage_multiplier;
 

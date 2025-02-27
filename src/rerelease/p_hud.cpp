@@ -737,6 +737,14 @@ void G_SetStats(edict_t *ent)
 	item_id_t power_armor_type;
 	unsigned int invIndex;
 
+	// NOTE(Oskar): XP and level stats
+	ent->client->ps.stats[STAT_XP] = ent->client->pers.PlayerXP;
+	ent->client->ps.stats[STAT_LEVEL] = ent->client->pers.PlayerLevel;
+	if (ent->client->ps.stats[STAT_LEVEL] == 0)
+	{
+		ent->client->ps.stats[STAT_LEVEL] = 1;
+	}
+	
 	//
 	// health
 	//

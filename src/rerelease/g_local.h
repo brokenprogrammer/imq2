@@ -2770,6 +2770,9 @@ struct client_persistant_t
 	int32_t lives; // player lives left (1 = no respawns remaining)
 	uint8_t n64_crouch_warn_times;
 	gtime_t n64_crouch_warning;
+
+	int PlayerXP;
+	int PlayerLevel;
 };
 
 // client data that stays across deathmatch respawns

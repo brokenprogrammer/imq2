@@ -453,16 +453,24 @@ void IMQ2UpgradeSelectionButton(imq2 *UI, imq2_rect_slice Layout, float Value, c
 {
     imq2_rect Rectangle = IMQ2ApplySlice(Layout, Value);
 
-    IMQ2ElementCreate(UI, (Element_Flag_Clickable | Element_Flag_DrawBackgroundPic), NULL, "backtile", Rectangle);
+    imq2_ui_element *Parent = IMQ2ElementCreate(UI, (Element_Flag_Clickable | Element_Flag_DrawBackgroundPic), NULL, "backtile", Rectangle);
     
-    imq2_rect LabelRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Top), 30);
-    IMQ2ElementCreate(UI, (Element_Flag_DrawText), Label, NULL, LabelRectangle);
-
-    imq2_rect PicRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Top), 50);
-    IMQ2ElementCreate(UI, (Element_Flag_DrawPic), NULL, Pic, PicRectangle);
-
-    imq2_rect TextRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Top), 60);
-    IMQ2ElementCreate(UI, (Element_Flag_DrawText), Text, NULL, TextRectangle);
+    IMQ2PushParent(UI, Parent);
+    {
+        IMQ2PushVerticalAlignment(UI, imq2_vertical_align::RelativeTop);
+        {
+            imq2_rect LabelRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Top), 50);
+            IMQ2ElementCreate(UI, (Element_Flag_DrawText), Label, NULL, LabelRectangle);
+        
+            imq2_rect PicRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Top), 50);
+            IMQ2ElementCreate(UI, (Element_Flag_DrawPic), NULL, Pic, PicRectangle);
+        
+            imq2_rect TextRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Top), 60);
+            IMQ2ElementCreate(UI, (Element_Flag_DrawText), Text, NULL, TextRectangle);
+        }
+        IMQ2PopVerticalAlignment(UI);
+    }
+    IMQ2PopParent(UI);
 }
 
 void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, float Max, float Progress, const char *Label, const char *Pic)
@@ -485,19 +493,101 @@ void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, f
     {
         IMQ2PushHorizontalAlignment(UI, imq2_horizontal_align::RelativeLeft);
         {
-            IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
+            // IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
             {
                 IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle);
             }
-            IMQ2PopBackgroundColor(UI);
+            // IMQ2PopBackgroundColor(UI);
         }
         IMQ2PopHorizontalAlignment(UI);
     }
     IMQ2PopParent(UI);
 
+    IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, "progress", RectangleCopy);
     IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
 
+    if (Label != NULL)
+    {
+        IMQ2ElementCreate(UI, Element_Flag_DrawText, Label, NULL, RectangleCopy);
+    }
+}
+
+void IMQ2Label(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label, const char *Pic)
+{
+    imq2_ui_element *Parent = NULL;
+    imq2_rect Rectangle = IMQ2ApplySlice(Layout, Value);
+    imq2_rect RectangleCopy = { Rectangle.MinX, Rectangle.MinY, Rectangle.MaxX, Rectangle.MaxY };
+    IMQ2PushBackgroundColor(UI, {0, 0, 0, 255});
+    {
+        Parent = IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy);
+    }
+    IMQ2PopBackgroundColor(UI);
+
+    
+    IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
+    
+    // IMQ2PushParent(UI, Parent);
+    // {
+    //     IMQ2PushVerticalAlignment(UI, imq2_vertical_align::RelativeCenter);
+    //     {
     IMQ2ElementCreate(UI, Element_Flag_DrawText, Label, NULL, RectangleCopy);
+    //     }
+    //     IMQ2PopVerticalAlignment(UI);
+    // }
+    // IMQ2PopParent(UI);
+}
+
+void IMQ2Pic(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Pic, const char *BackgroundPic)
+{
+    imq2_ui_element *Parent = NULL;
+    imq2_rect Rectangle = IMQ2ApplySlice(Layout, Value);
+    imq2_rect RectangleCopy = { Rectangle.MinX, Rectangle.MinY, Rectangle.MaxX, Rectangle.MaxY };
+    IMQ2PushBackgroundColor(UI, {0, 0, 0, 255});
+    {
+        Parent = IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy);
+    }
+    IMQ2PopBackgroundColor(UI);
+
+    if (BackgroundPic != NULL)
+    {
+        IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, BackgroundPic, RectangleCopy);
+    }
+    
+    // IMQ2PushParent(UI, Parent);
+    // {
+    //     IMQ2PushVerticalAlignment(UI, imq2_vertical_align::RelativeCenter);
+    //     {
+    IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
+    //     }
+    //     IMQ2PopVerticalAlignment(UI);
+    // }
+    // IMQ2PopParent(UI);
+}
+
+void IMQ2Buff(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Pic, const char *BuffString)
+{
+    imq2_ui_element *Parent = NULL;
+    imq2_rect Rectangle = IMQ2ApplySlice(Layout, Value);
+    imq2_rect RectangleCopy = { Rectangle.MinX, Rectangle.MinY, Rectangle.MaxX, Rectangle.MaxY };
+    IMQ2PushBackgroundColor(UI, {0, 0, 0, 255});
+    {
+        Parent = IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy);
+    }
+    IMQ2PopBackgroundColor(UI);
+
+    IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
+
+    IMQ2PushParent(UI, Parent);
+    {
+        IMQ2PushVerticalAlignment(UI, imq2_vertical_align::RelativeBottom);
+        IMQ2PushHorizontalAlignment(UI, imq2_horizontal_align::RelativeRight);
+        {
+            IMQ2ElementCreate(UI, Element_Flag_DrawText, BuffString, NULL, { -Value, (-(Rectangle.MaxY*2)), Value, Rectangle.MaxY });
+        }
+        IMQ2PopHorizontalAlignment(UI);
+        IMQ2PopVerticalAlignment(UI);
+    }
+    IMQ2PopParent(UI);
 }
 
 void IMQ2Speedometer(imq2 *UI, imq2_rect_slice Layout, float Value, float Progress, const char *Label, const char *Pic)

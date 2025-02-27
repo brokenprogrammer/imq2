@@ -1626,13 +1626,20 @@ void Cmd_CustomUI_f(edict_t* ent)
 	cl->showCustomUI = true;
     ent->movetype = MOVETYPE_NOCLIP;
 
-	imq2_rect Layout = { 0, 0, 100, 50 };
+	imq2_rect Layout = { -110, 0, 360, 180 };
 	IMQ2Begin(&cl->UI, Layout);
-	IMQ2UpgradeSelectionButton(&cl->UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 100, "Upgrade", "w_blaster", "10x Damage");
-	IMQ2SliceLeft(&Layout, 10);
-	IMQ2UpgradeSelectionButton(&cl->UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 100, "Boost", "i_health", "10 Bonus\nMax HP");
-	IMQ2SliceLeft(&Layout, 10);
-	IMQ2UpgradeSelectionButton(&cl->UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 100, "Upgrade", "w_bfg", "2x Damage");
+	IMQ2PushHorizontalAlignment(&cl->UI, imq2_horizontal_align::Center);
+	IMQ2PushVerticalAlignment(&cl->UI, imq2_vertical_align::Center);
+	{
+		IMQ2UpgradeSelectionButton(&cl->UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 100, "Upgrade", "w_blaster", "10x Damage");
+		IMQ2SliceLeft(&Layout, 10);
+		IMQ2UpgradeSelectionButton(&cl->UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 100, "Boost", "i_health", "10 Bonus\nMax HP");
+		IMQ2SliceLeft(&Layout, 10);
+		IMQ2UpgradeSelectionButton(&cl->UI, IMQ2PrepareSlice(&Layout, Slice_Side_Left), 100, "Upgrade", "w_bfg", "2x Damage");
+	}
+	IMQ2PopVerticalAlignment(&cl->UI);
+	IMQ2PopHorizontalAlignment(&cl->UI);
+
     IMQ2End(&cl->UI);
 
 	std::string UIString = IMQ2BuildUIString(&cl->UI);

@@ -2044,7 +2044,7 @@ void CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect_t hud_vrect
 
     // draw HUD
     if (!cl_skipHud->integer && !(ps->stats[STAT_LAYOUTS] & LAYOUTS_HIDE_HUD))
-        CG_ExecuteLayoutString(cgi.get_configstring(CS_STATUSBAR), hud_vrect, hud_safe, scale, playernum, ps);
+        //CG_ExecuteLayoutString(cgi.get_configstring(CS_STATUSBAR), hud_vrect, hud_safe, scale, playernum, ps);
 
     // draw centerprint string
     CG_CheckDrawCenterString(ps, hud_vrect, hud_safe, isplit, scale);
@@ -2059,6 +2059,86 @@ void CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect_t hud_vrect
     // inventory too
     if (ps->stats[STAT_LAYOUTS] & LAYOUTS_INVENTORY)
         CG_DrawInventory(ps, data->inventory, hud_vrect, scale);
+
+    std::string HealthString = fmt::format("{}\n/100", (int)ps->stats[STAT_HEALTH]);
+    std::string AmmoString = fmt::format("inf\n/inf");
+    std::string XPString = fmt::format("{}%", (int)ps->stats[STAT_XP] * 10);
+    std::string LevelString = fmt::format("{}", (int)ps->stats[STAT_LEVEL]);
+
+    imq2_rect Layout = { 0, 0, 115, 15 };
+    imq2 UI1;
+    
+    imq2_rect HealthLayout = { 0, 0, 100, 60 };
+    imq2_rect BottomHealthLayout = IMQ2SliceTop(&HealthLayout, 10);
+    imq2_rect TopHealthLayout = HealthLayout;
+    imq2_rect FaceRect = IMQ2SliceLeft(&TopHealthLayout, 50);
+
+    imq2_rect AmmoLayout = { 0, 0, 100, 60 };
+    imq2_rect BottomAmmoLayout = IMQ2SliceTop(&AmmoLayout, 10);
+    imq2_rect TopAmmoLayout = AmmoLayout;
+
+    int NumberOfBuffs = 5;
+    imq2_rect BuffLayout = { -(((NumberOfBuffs * 25) + (NumberOfBuffs - 1) * 5) / 2), 0, 250, 25 };
+
+    IMQ2Begin(&UI1, Layout);
+    {
+        IMQ2PushVerticalAlignment(&UI1, imq2_vertical_align::Top);
+        IMQ2PushHorizontalAlignment(&UI1, imq2_horizontal_align::Center);
+        {
+            IMQ2Buff(&UI1, IMQ2PrepareSlice(&BuffLayout, Slice_Side_Left), 25, "w_blaster", "1");
+            IMQ2SliceLeft(&BuffLayout, 5);
+            IMQ2Pic(&UI1, IMQ2PrepareSlice(&BuffLayout, Slice_Side_Left), 25, "w_shotgun", NULL);
+            IMQ2SliceLeft(&BuffLayout, 5);
+            IMQ2Buff(&UI1, IMQ2PrepareSlice(&BuffLayout, Slice_Side_Left), 25, "i_health", "2");
+            IMQ2SliceLeft(&BuffLayout, 5);
+            IMQ2Buff(&UI1, IMQ2PrepareSlice(&BuffLayout, Slice_Side_Left), 25, "w_machinegun", "5");
+            IMQ2SliceLeft(&BuffLayout, 5);
+            IMQ2Pic(&UI1, IMQ2PrepareSlice(&BuffLayout, Slice_Side_Left), 25, "a_bullets", NULL);
+        }
+        IMQ2PopHorizontalAlignment(&UI1);
+        IMQ2PopVerticalAlignment(&UI1);
+
+
+        IMQ2PushVerticalAlignment(&UI1, imq2_vertical_align::Bottom);
+        IMQ2PushHorizontalAlignment(&UI1, imq2_horizontal_align::Left);
+        {
+            IMQ2ElementCreate(&UI1, Element_Flag_DrawBackgroundPic, NULL, "face1", FaceRect);
+            IMQ2Label(&UI1, IMQ2PrepareSlice(&TopHealthLayout, Slice_Side_Left), 50, HealthString.c_str(), "progress_bar");
+            IMQ2PushBackgroundColor(&UI1, {255, 0, 0, 255});
+            {
+                IMQ2ProgressBar(&UI1, IMQ2PrepareSlice(&BottomHealthLayout, Slice_Side_Left), 100, 0, 100, (int)ps->stats[STAT_HEALTH], NULL, "progress_bar");
+            }
+            IMQ2PopBackgroundColor(&UI1);
+        }
+        IMQ2PopHorizontalAlignment(&UI1);
+        IMQ2PopVerticalAlignment(&UI1);
+
+        IMQ2PushVerticalAlignment(&UI1, imq2_vertical_align::Bottom);
+        IMQ2PushHorizontalAlignment(&UI1, imq2_horizontal_align::Right);
+        {
+            IMQ2Label(&UI1, IMQ2PrepareSlice(&TopAmmoLayout, Slice_Side_Right), 50, AmmoString.c_str(), "progress_bar");
+            IMQ2Pic(&UI1, IMQ2PrepareSlice(&TopAmmoLayout, Slice_Side_Right), 50, "inva1_nailgun", "progress_bar");
+        }
+        IMQ2PopHorizontalAlignment(&UI1);
+        IMQ2PopVerticalAlignment(&UI1);
+
+        IMQ2PushVerticalAlignment(&UI1, imq2_vertical_align::Top);
+        IMQ2PushHorizontalAlignment(&UI1, imq2_horizontal_align::Right);
+        {
+            IMQ2Label(&UI1, IMQ2PrepareSlice(&Layout, Slice_Side_Right), 15, LevelString.c_str(), "progress_bar");
+            IMQ2PushBackgroundColor(&UI1, {57, 255, 20, 255});
+            {
+                IMQ2ProgressBar(&UI1, IMQ2PrepareSlice(&Layout, Slice_Side_Right), 100, 0, 10, (int)ps->stats[STAT_XP], XPString.c_str(), "progress_bar");
+            }
+            IMQ2PopBackgroundColor(&UI1);
+        }
+        IMQ2PopHorizontalAlignment(&UI1);
+        IMQ2PopVerticalAlignment(&UI1);
+    }
+    IMQ2End(&UI1);
+
+    std::string UIString = IMQ2BuildUIString(&UI1);
+    CG_ExecuteLayoutString(UIString.c_str(), hud_vrect, hud_safe, scale, playernum, ps);
 
     if (speedometer->integer)
     {
