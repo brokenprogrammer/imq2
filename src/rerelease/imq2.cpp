@@ -481,34 +481,30 @@ void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, f
     float TotalWidth = Rectangle.MaxX - Rectangle.MinX;;
     float ProgressWidth = TotalWidth * (Progress - Min) / (Max - Min);
 
-    imq2_rect RectangleCopy = { Rectangle.MinX, Rectangle.MinY, Rectangle.MaxX, Rectangle.MaxY };
     IMQ2PushBackgroundColor(UI, {0, 0, 0, 255});
     {
-        Parent = IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, RectangleCopy);
+        Parent = IMQ2ElementCreate(UI, Element_Flag_DrawBackground, NULL, NULL, Rectangle);
     }
     IMQ2PopBackgroundColor(UI);
-
-    imq2_rect ProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&Rectangle, Slice_Side_Left), ProgressWidth);
+    
+    imq2_rect RectangleCopy = { Rectangle.MinX, Rectangle.MinY, Rectangle.MaxX, Rectangle.MaxY };
+    imq2_rect ProgressRectangle = IMQ2ApplySlice(IMQ2PrepareSlice(&RectangleCopy, Slice_Side_Left), ProgressWidth);
     IMQ2PushParent(UI, Parent);
     {
         IMQ2PushHorizontalAlignment(UI, imq2_horizontal_align::RelativeLeft);
         {
-            // IMQ2PushBackgroundColor(UI, {57, 255, 20, 255});
-            {
-                IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle);
-            }
-            // IMQ2PopBackgroundColor(UI);
+            IMQ2ElementCreate(UI, (Element_Flag_DrawBackground), NULL, NULL, ProgressRectangle);
         }
         IMQ2PopHorizontalAlignment(UI);
     }
     IMQ2PopParent(UI);
 
-    IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, "progress", RectangleCopy);
-    IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, RectangleCopy);
+    IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, "progress", Rectangle);
+    IMQ2ElementCreate(UI, Element_Flag_DrawBackgroundPic, NULL, Pic, Rectangle);
 
     if (Label != NULL)
     {
-        IMQ2ElementCreate(UI, Element_Flag_DrawText, Label, NULL, RectangleCopy);
+        IMQ2ElementCreate(UI, Element_Flag_DrawText, Label, NULL, Rectangle);
     }
 }
 
