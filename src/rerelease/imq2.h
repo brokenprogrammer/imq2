@@ -157,4 +157,7 @@ imq2_ui_element *IMQ2ElementCreate(imq2 *UI, imq2_element_flags Flags, const cha
 void IMQ2Button(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label);
 void IMQ2UpgradeSelectionButton(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label, const char *Pic, const char *Text);
 void IMQ2ProgressBar(imq2 *UI, imq2_rect_slice Layout, float Value, float Min, float Max, float Progress, const char *Label, const char *Pic);
+void IMQ2Label(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Label, const char *Pic);
+void IMQ2Pic(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Pic, const char *BackgroundPic);
+void IMQ2Buff(imq2 *UI, imq2_rect_slice Layout, float Value, const char *Pic, const char *BuffString);
 void IMQ2Speedometer(imq2 *UI, imq2_rect_slice Layout, float Value, float Progress, const char *Label, const char *Pic);

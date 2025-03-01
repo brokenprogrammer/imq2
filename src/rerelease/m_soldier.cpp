@@ -1651,9 +1651,12 @@ DIE(soldier_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 
 	soldierh_hyper_laser_sound_end(self);
 
+	
 	// check for gib
 	if (M_CheckGib(self, mod))
 	{
+		attacker->client->pers.PlayerXP += 1;
+		
 		gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
 
 		self->s.skinnum /= 2;

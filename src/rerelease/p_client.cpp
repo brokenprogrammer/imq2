@@ -806,6 +806,9 @@ but is called after each death and level change in deathmatch
 */
 void InitClientPersistant(edict_t *ent, gclient_t *client)
 {
+	client->pers.PlayerXP = 0;
+	client->pers.PlayerLevel = 1;
+
 	// backup & restore userinfo
 	char userinfo[MAX_INFO_STRING];
 	Q_strlcpy(userinfo, client->pers.userinfo, sizeof(userinfo));

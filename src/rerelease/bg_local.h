@@ -257,6 +257,9 @@ enum player_stat_t
 	// [Paril-KEX]
 	STAT_ACTIVE_WEAPON,
 
+	STAT_XP,
+	STAT_LEVEL,
+
 	// don't use; just for verification
     STAT_LAST
 };
